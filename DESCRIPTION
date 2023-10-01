@@ -1,0 +1,11 @@
+Package: CustomGenome
+Title: Append Custom FASTA sequences to your Genome and Annotation Files for Downstream Mapping
+Version: 0.0.0.9000
+Authors@R: 
+    person("Mehmet", "Tekman", , "mtekman89@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-4181-2676"))
+Description: Generate a new Ensembl genome and annotation file with custom FASTA sequences (e.g. GFP, Tomato) and produce RNA-seq count matrices with them. 
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
