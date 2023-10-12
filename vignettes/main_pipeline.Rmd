@@ -1,0 +1,445 @@
+---
+title: "CustomGenome reference manual"
+date: "`r Sys.Date()`"
+author: "Mehmet Tekman"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Example CustomGenome analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+\tableofcontents
+```{r echo=FALSE}
+knitr::opts_chunk$set(fig.width=8, fig.height=8, dpi=50, dev='jpeg') 
+```
+
+# CustomGenome
+
+Quantifying bulk RNA-seq data is a crucial step in analyzing gene
+expression levels. However, when working with complex genomes such as
+human and mouse, it is important to have accurate quantification of
+both coding and non-coding regions. An extended genome can provide
+additional sequences that are not present in the reference genome,
+allowing for more comprehensive analysis of RNA-seq data. In this
+vignette, we will demonstrate how to use an extended genome with
+desired additional sequences provided by the user for quantification
+of bulk RNA-seq data using the `CustomGenome` package.
+
+This package provides an easy-to-use pipeline of R functions to
+quantify and analyze custom sequences for genomes of choice.
+
+
+#### Pre-requisites
+
+This vignette provides a manual for the quantification of bulk RNA-seq
+data using an extended genome with desired additional sequences
+provided by the user.
+
+The workflow is split into two stages:
+
+1. Inserting the new FASTA sequences into genomic reference data
+2. Performing alignment and quantification via Rsubread of this new
+   genomic reference.
+
+
+# Example CustomGenome analysis
+
+Here we describe an example analysis using two user-FASTA sequences
+describing GFP and Tomato sequences:
+
+```
+>One
+ATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGG
+GCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACCGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCCTGACCTA
+CGGCGTGCAGTGCTTCAGCCGCTACCCCGACCACATGAAGCAGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTC
+TTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGG
+ACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAG
+>Two
+ATGGCGACGTGAACGGACACAAGTTCAGCGTGTCCGGCGAGGGGGAGGGGGATGCCACATACGGAAAGCTGACCCTGAAGTTTATCTGCACCACCGGCAA
+GCTGCCCGTGCCCTGGCCTACACTCGTGACCACACTGACCTACGGCGTGCAGTGCTTCTCCAGATACCCCGACCATATGAAGCAGCACGACTTCTTCAAG
+AGCGCCATGCCTGAGGGCTACGTGCAGGAAAGAACCATCTTCTTTAAGGACGACGGCAACTACAAGACCAGGGCCGAAGTGAAGTTTGAGGGCGACACCC
+TCGTGAACAGAATCGAGCTGAAGGGGATCGACTTCAAAGAGGACGGCAACATCCTGGGCCACAAGCTGGAGTACAACTACAACTCCCACAACGTGTACAT
+CATGGCCGACAAACAGAAAAACGGCATCAAAGTGA
+>Three
+ATGGTGTCCAAGGGCGAGGAAGTGATCAAAGAGTTCATGCGGTTCAAAGTGCGGATGGAAGGCAGCATGAACGGCCACGAGTTCGAGATCGAGGGCGAGG
+GCGAAGGCAGACCTTACGAGGGCACACAGACCGCCAAGCTGAAAGTGACCAAGGGCGGACCCCTGCCCTTCGCCTGGGATATTCTGAGCCCCCAGTTTAT
+GTACGGCAGCAAGGCCTACGTGAAGCACCCCGCCGACATCCCCGACTACAAGAAGCTGAGCTTCCCCGAGGGCTTCAAGTGGGAGAGAGTGATGAACTTC
+GAGGACGGCGGCCTCGTGACCGTGACACAGGATAGCAGCCTGCAGGACGGCACCCTGATCTACAAAGTGAAGATGAGAGGCACCAACTTCCCCCCCGACG
+GCCCCGTGATGCAGAAAAAGACTATGGGCTGGGAGGCCAGCACCGAGAGACTGTACCCTAGAGATGGCGTGCTGAAGGGCGAGATCCACCAGGCCCTGAA
+GCTGAAG
+```
+
+You can access this dataset by loading it as an example dataset:
+
+```R
+data("user_sequences")
+```
+
+## Inserting the new FASTA sequences into genomic reference data
+
+We will use these above user sequences and append them to our reference data.
+To do so, we first need to retrieve the remote genome files from Ensembl.
+
+This can be performed in two ways:
+
+1. Download and Retrieve Known Genomes
+2. Download and Retrieve Other or Custom Genomes
+
+### Known Genomes
+
+Known genomes currently encapsulates *Mus Musculus*, *Homo Sapiens*,
+and *Danio rerio*. The release version (default = 105) can also be set
+for this genomes.
+
+Genomes FASTA sequences and their accompanying Annotation GTF files
+are downloaded via the `wget` method. Checksums for these files (based
+on UNIX's sum commandline utility) are also downloaded and validated locally.
+
+This step can take approximately 10 minutes to download required files.
+
+In this example, we will download the latest *Homo Sapiens* genome, and store it
+in a local "genomes" folder. Using the `get_genome_files` function.
+
+
+```R
+homo_sap = get_genome_files(species="homo_sapiens", 
+                           output_folder="genomes")
+homo_sap
+```
+
+    > GTF file: genomes/Homo_sapiens.GRCh38.105.gtf.gz exists already    
+    > Checksum: genomes/Homo_sapiens.GRCh38.105.gtf.gz.sum already exists
+    > FASTA file: genomes/Homo_sapiens.GRCh38.105.gtf.gz exists already, skipping
+    > Checksum: genomes/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz.sum already exists
+
+
+The output is stored in the `homo_sap` variable which returns an
+object with two components denoting the local positions of the GTF and
+FASTA files for that genome.
+
+```R
+## Outputs:
+$gtf   : 'genomes/Homo_sapiens.GRCh38.105.gtf.gz'
+$fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz'
+```
+
+### Other Ensembl Genomes
+
+If your genome of interest is neither *Mus Musculus*, *Homo Sapiens*,
+or *Danio rerio*, it is relatively trivial to supply a custom genome
+using the `urls_override` parameter.
+
+In the code snippet below, we download the latest *Xenopus Tropicalis*
+genome FASTA and GTF annotation file.
+
+```R
+base_url <- "http://ftp.ensembl.org/pub/release-105"
+xen_trop <- get_genome_files(urls_override=list(
+  gtf=paste0(base_url,  "/gtf/xenopus_tropicalis/",
+             "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.105.gtf.gz"),
+  fasta=paste0(base_url, "/fasta/xenopus_tropicalis/dna/",
+             "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz")))
+xen_trop
+```
+
+Once again the `get_genome_files` function outputs a GTF and FASTA
+component which will be used later in the downstream annotation.
+
+```R
+## Outputs:
+$gtf   : 'genomes/Xenopus_tropicalis.Xenopus_tropicalis_v9.1.105.gtf.gz'
+$fasta : 'genomes/Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz'
+```
+
+## Appending New Sequences
+
+
+This is the part where we insert our user-FASTA exogenous sequences
+into the genome sequence and annotation files.
+
+Each new sequence in the user-FASTA file will be added as a new "gene"
+with a single "exon" that spans the entire sequence given. 
+
+This is performed via the function `add_seqs_to_gtf_and_fasta` which
+takes as input the output from the `get_genome_files` function above,
+along with the filename for the user-sequences.
+
+
+```R
+my_exogenous_sequences <- "user_sequences.fasta"  ## filename to user-FASTA
+new_genome_files <- add_seqs_to_gtf_and_fasta(homo_sap, my_exogenous_sequences)
+new_genome_files
+```
+
+    > Inserting Sequences
+    > Importing GTF
+    > GTF features before:              3236571
+    >          - after biotype filter:  2866886
+    >          - after genename filter: 2843440
+    > Appending Sequences to GTF
+    >          - One
+    >          - Two
+    >          - Three
+    > Saving new GTF file to: genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz
+    > FASTA exists: 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_Two_Three.fa.gz' doing nothing.
+    
+This step takes approximately 5-10 minutes depending on your machine,
+and it utilizes the same GTF biotype filtering stages as the
+[cellranger pipeline](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr).
+
+The function also checks for valid genenames, omitting features which
+do not have a `gene_name` attribute.
+
+The function `add_seqs_to_gtf_and_fasta` returns the locations of the
+new sequence and annotation files, in the same manner as `get_genome_files`.
+
+```R
+## Outputs:
+$gtf   : 'genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz'
+$fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_Two_Three.fa.gz'
+```
+
+## Performing alignment and quantification via Rsubread of this new genomic reference.
+
+At this stage we have all the custom generated reference files that we
+need to perform quantification.
+
+Before we can quantify the genes, as well as the custom sequences, we
+need to perform alignment of our sequences. This involves three steps:
+
+1. Building an Alignment Index from Custom Genome
+2. Align Sequences to the Alignment Index
+3. Quantify Genes from Aligned Sequences
+
+
+### Building an alignment index for the new custom genome
+
+These
+
+```R
+index_dir <- retrieve_index(new_genome_files$fasta)
+index_dir
+```
+
+    > Warning message in dir.create(index.dir):
+    > “'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index' already exists”
+
+
+```R
+# Outputs
+'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index'
+```
+
+(This takes about an hour, no way to speed it up or for it to use multiple cores.)
+
+### Priming Input FASTQ
+
+ ```R
+dir_lists <- list(index=index_dir,   ## From previous step
+                   fastq="1_fastqs_remote_mount",
+                   align="2_bams",
+                   count="3_counts")
+
+read_lists <- prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
+read_lists
+```
+
+```R
+# Outputs
+$reads1 : '1_fastqs_remote_mount/Group1_1_R1.fastq.gz'
+          '1_fastqs_remote_mount/Group1_2_R1.fastq.gz'
+          '1_fastqs_remote_mount/Group1_3_R1.fastq.gz'
+          '1_fastqs_remote_mount/Group2_1_R1.fastq.gz'
+          '1_fastqs_remote_mount/Group2_2_R1.fastq.gz'
+          '1_fastqs_remote_mount/Group2_3_R1.fastq.gz'
+          '1_fastqs_remote_mount/Group3_1_R1.fastq.gz'
+          '1_fastqs_remote_mount/Group3_2_R1.fastq.gz'
+          '1_fastqs_remote_mount/Group3_3_R1.fastq.gz'
+
+$reads2 : '1_fastqs_remote_mount/Group1_1_R2.fastq.gz'
+          '1_fastqs_remote_mount/Group1_2_R2.fastq.gz'
+          '1_fastqs_remote_mount/Group1_3_R2.fastq.gz'
+          '1_fastqs_remote_mount/Group2_1_R2.fastq.gz'
+          '1_fastqs_remote_mount/Group2_2_R2.fastq.gz'
+          '1_fastqs_remote_mount/Group2_3_R2.fastq.gz'
+          '1_fastqs_remote_mount/Group3_1_R2.fastq.gz'
+          '1_fastqs_remote_mount/Group3_2_R2.fastq.gz'
+          '1_fastqs_remote_mount/Group3_3_R2.fastq.gz'
+
+$align_base : 'Group1_1_align.bam'
+              'Group1_2_align.bam'
+              'Group1_3_align.bam'
+              'Group2_1_align.bam'
+              'Group2_2_align.bam'
+              'Group2_3_align.bam'
+              'Group3_1_align.bam'
+              'Group3_2_align.bam'
+              'Group3_3_align.bam'
+```
+
+### Perform Alignment
+
+Here we map the FASTQ files to our custom genome using the Rsubread
+library. By default this runs on 30 threads, but can be easily
+overriden by the \code{nthreads} parameter. On a modern workhorse
+machine, this takes 10-20 minutes.
+
+```R
+perform_alignment(dir_lists, read_lists)
+```
+           Rsubread 2.14.2
+    
+    //================================= setting ==================================\\
+    ||                                                                            ||
+    || Function      : Read alignment (RNA-Seq)                                   ||
+    || Input file 1  : Group1_1_R1.fastq.gz                                       ||
+    || Input file 2  : Group1_1_R2.fastq.gz                                       ||
+    || Output file   : Group1_1_R1.fastq.gz-align.bam (BAM)                       ||
+    || Index name    : reference_index                                            ||
+    ||                                                                            ||
+    ||                    ------------------------------------                    ||
+    ||                                                                            ||
+    ||                               Threads : 30                                 ||
+    ||                          Phred offset : 33                                 ||
+    ||               # of extracted subreads : 10                                 ||
+    ||                        Min read1 vote : 3                                  ||
+    ||                        Min read2 vote : 1                                  ||
+    ||                     Max fragment size : 600                                ||
+    ||                                                                            ||
+    ||             Total fragments : 52,643,874                                   ||
+    ||                      Mapped : 51,740,759 (98.3%)                           ||
+    ||             Uniquely mapped : 50,119,180                                   ||
+    ||               Multi-mapping : 1,621,579                                    ||
+    ||                                                                            ||
+    ||                    Unmapped : 903,115                                      ||
+    ||                                                                            ||
+    ||             Properly paired : 39,616,581                                   ||
+    ||         Not properly paired : 12,124,178                                   ||
+    ||                   Singleton : 2,174,913                                    ||
+    ||                    Chimeric : 3,153,831                                    ||
+    ||       Unexpected strandness : 193,036                                      ||
+    ||  Unexpected fragment length : 5,837,741                                    ||
+    ||       Unexpected read order : 764,657                                      ||
+    ||                                                                            ||
+    ||                      Indels : 201,441                                      ||
+    ||                                                                            ||
+    ||                Running time : 4.4 minutes                                  ||
+    ||                                                                            ||
+    \\============================================================================//
+    
+
+|                                     | Group1_1 | Group1_2 | Group1_3 | Group2_1 | Group2_2 | Group2_3 | Group3_1 | Group3_2 | Group3_3 |
+|------------------------------------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
+|                 **Total_fragments** | 42515177 | 54629686 | 53989034 | 76791529 | 61748197 | 54436875 | 50911032 | 55296965 | 52643874 |
+|                **Mapped_fragments** | 41714826 | 53845492 | 53112104 | 75504806 | 60610611 | 53494266 | 49987297 | 54252509 | 51740759 |
+|       **Uniquely_mapped_fragments** | 40506439 | 52291020 | 51566978 | 72277542 | 58725145 | 51896523 | 48559049 | 52544836 | 50119180 |
+|         **Multi_mapping_fragments** | 1208387  | 1554472  | 1545126  | 3227264  | 1885466  | 1597743  | 1428248  | 1707673  | 1621579  |
+|              **Unmapped_fragments** | 800351   | 784194   | 876930   | 1286723  | 1137586  | 942609   | 923735   | 1044456  | 903115   |
+|       **Properly_paired_fragments** | 32582893 | 42138280 | 40613433 | 59163258 | 46670208 | 41181233 | 39208458 | 41584645 | 39616581 |
+|             **Singleton_fragments** | 1564504  | 1754361  | 2109739  | 2599890  | 2729367  | 2303469  | 1914953  | 2304702  | 2174913  |
+|     **More_than_one_chr_fragments** | 1769660  | 2176411  | 2722550  | 3289393  | 3616468  | 2985652  | 1871765  | 3362698  | 3153831  |
+| **Unexpected_strandness_fragments** | 127341   | 161925   | 184220   | 229782   | 221355   | 189316   | 142358   | 203971   | 193036   |
+|      **Unexpected_template_length** | 5115064  | 6899004  | 6753969  | 9139980  | 6350098  | 6045815  | 6090996  | 6002442  | 5837741  |
+|                **Inversed_mapping** | 555364   | 715511   | 728193   | 1082503  | 1023115  | 788781   | 758767   | 794051   | 764657   |
+|                          **Indels** | 170921   | 211140   | 206206   | 272347   | 221484   | 204585   | 196881   | 207353   | 201441   |
+
+
+
+```R
+summarize_alignment(dir_lists$align, read_lists$align)
+```
+
+    > Wrote: 2_bams/stats_summary.tsv
+    
+
+|       Sample | Total Reads | Mapped Reads | % Mapped |
+|-------------:|------------:|-------------:|---------:|
+| **Group1_1** |    42515177 |     41714826 |   98.117 |
+| **Group1_2** |    54629686 |     53845492 |   98.565 |
+| **Group1_3** |    53989034 |     53112104 |   98.376 |
+| **Group2_1** |    76791529 |     75504806 |   98.324 |
+| **Group2_2** |    61748197 |     60610611 |   98.158 |
+| **Group2_3** |    54436875 |     53494266 |   98.269 |
+| **Group3_1** |    50911032 |     49987297 |   98.186 |
+| **Group3_2** |    55296965 |     54252509 |   98.111 |
+| **Group3_3** |    52643874 |     51740759 |   98.284 |
+
+
+### Generating Count Matrices
+
+All we need to do is specify the feature type:
+
+```bash
+cat genomes/Homo_sapiens.GRCh38.105_with_GFP_TB.gtf | awk '{print $3}' | sort | uniq -c
+
+ 838953 CDS
+1303844 exon
+ 190471 three_prime_utr
+ 166088 five_prime_utr
+  20633 gene
+ 165137 transcript
+    119 Selenocysteine
+  94057 start_codon
+  87585 stop_codon
+```
+
+Our annotated sequences will appear only as exons in a new gene, so it
+makes sense to specify "exon" as our feature of interest.
+
+```R
+generate_count_matrix(dir_lists, 
+                      new_genome_files$gtf, 
+                      featuretype = "exon")
+```
+
+
+    Counting exon threads=30
+    
+   
+           Rsubread 2.14.2
+
+    //========================== featureCounts setting ===========================\\
+    ||                                                                            ||
+    ||             Input files : 9 BAM files                                      ||
+    ||                                                                            ||
+    ||                           Group1_1_align.bam                               ||
+    ||                           Group3_3_align.bam                               ||
+    ||                                                                            ||
+    ||              Paired-end : yes                                              ||
+    ||        Count read pairs : yes                                              ||
+    ||              Annotation : Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ( ... ||
+    ||      Dir for temp files : .                                                ||
+    ||       Junction Counting : <output_file>.jcounts                            ||
+    ||                 Threads : 30                                               ||
+    ||                   Level : meta-feature level                               ||
+    ||      Multimapping reads : counted                                          ||
+    || Multi-overlapping reads : not counted                                      ||
+    ||   Min overlapping bases : 1                                                ||
+    ||                                                                            ||
+    \\============================================================================//
+    
+    //================================= Running ==================================\\
+    ||                                                                            ||
+    || Load annotation file Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ...        ||
+    ||    Features : 1293866                                                      ||
+    ||    Meta-features : 20004                                                   ||
+    ||    Chromosomes/contigs : 27                                                ||
+    ||                                                                            ||
+    || Process BAM file Group3_3_align.bam...                                     ||
+    ||    Paired-end reads are included.                                          ||
+    ||    Total alignments : 52643874                                             ||
+    ||    Successfully assigned alignments : 42705701 (81.1%)                     ||
+    ||    Running time : 0.13 minutes                                             ||
+    ||                                                                            ||
+    || Write the final count table.                                               ||
+    || Write the junction count table.                                            ||
+    || Write the read assignment summary.                                         ||
+    ||                                                                            ||
+    \\============================================================================//
+    
+    Stats written to: 3_counts/exon.gene_name.stats.tsv
+    Counts written to: 3_counts/exon.gene_name.matrix.tsv
+

@@ -210,7 +210,7 @@ get_genome_files <- function(species = "mus_musculus",
 #' new_genome_files = add_seqs_to_gtf_and_fasta(mus_musc, "~/mynewseqs.fasta")
 #' @export
 add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
-  message("Insert Seqs")
+  message("Inserting Sequences")
   insert_seqs <- readDNAStringSet(new_seqs_file)
   ## Remove leading spaces in names
   names(insert_seqs) <- trimws(names(insert_seqs))
@@ -241,14 +241,14 @@ add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
         "TR_V_gene", "TR_V_pseudogene", "TR_D_gene", "TR_J_gene",
         "TR_J_pseudogene", "TR_C_gene"
       )
-    message("GTF filter before:                ", nrow(tabb))
+    message("GTF features before:                ", nrow(tabb))
     tabb <- tabb[keep_features, ]
-    message("GTF filter after biotype filter:  ", nrow(tabb))
+    message("         - after biotype filter:  ", nrow(tabb))
     keep_genes <- !(is.na(tabb$gene_name) | is.null(tabb$gene_name))
     tabb <- tabb[keep_genes, ]
-    message("GTF filter after genename filter: ", nrow(tabb))
+    message("         - after genename filter: ", nrow(tabb))
 
-    message("Appending Sequences to GTF")
+    message("Appending Sequences to GTF:")
     new_gtf_entry <- function(dnaseq_entry) {
       nam <- names(dnaseq_entry)
       len <- width(dnaseq_entry)
@@ -275,7 +275,7 @@ add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
         names(insert_seqs)
       )
       for (ind in seq_along(names(insert_seqs))) {
-        message(names(insert_seqs)[ind])
+        message("         - ", names(insert_seqs)[ind])
         gtf_table <- rbind(gtf_table, new_gtf_entry(insert_seqs[ind]))
       }
       return(gtf_table)
@@ -283,7 +283,7 @@ add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
 
     tab2 <- add_lines_to_gtf(tabb, insert_seqs)
 
-    message("Saving new GTF file to ", new_gtf_file)
+    message("Saving new GTF file to: ", new_gtf_file)
     gtf_gz <- gzfile(new_gtf_file, "w")
     export(tab2, con = gtf_gz)
     close(gtf_gz)
