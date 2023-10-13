@@ -1,11 +1,21 @@
 Package: CustomGenome
 Title: Append Custom FASTA sequences to your Genome and Annotation Files for Downstream Mapping
-Version: 0.0.0.9000
+Version: 0.1.1
 Authors@R: 
-    person("Mehmet", "Tekman", , "mtekman89@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-4181-2676"))
-Description: Generate a new Ensembl genome and annotation file with custom FASTA sequences (e.g. GFP, Tomato) and produce RNA-seq count matrices with them. 
+    c(person(given="Mehmet", family="Tekman",
+        email = "mtekman89@gmail.com",
+        role = c("aut", "cre"),
+        comment = c(ORCID = "0000-0002-4181-2676")),
+      person(given="Sebastian", family="Arnold",
+        email = "sebastian.arnold@pharmakol.uni-freiburg.de",
+        role = c("fnd"),
+        comment = c(ORCID = "0000-0002-2688-9210")))
+Description: CustomGenome generates a new Ensembl reference genome sequence and annotation files with custom FASTA sequences (e.g. GFP, Tomato) and produces RNA-seq count matrices with them. Genome reference files are fetched and validated directly from Ensembl, user-sequences are then appended to both, and then the new reference files are written to disk. Downstream analysis is then facilitated via RSubread function wrappers to index the new reference, align user FASTA sequences to it, and then perform quantification for desired features (e.g. exon, utr, etc.)
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Depends: Rsubread (>= 2.14.2), Biostrings (>= 2.68.1), rtracklayer (>= 1.60.0), GenomicRanges (>= 1.52.0), GenomeInfoDb (>= 1.36.1)
+biocViews: Annotation, RNASeq, Alignment, MultipleSequenceAlignment, QualityControl, Preprocessing, Sequencing, DataImport, GeneExpression
+Imports: DNASeqFromset, import, download.file, file_path_sans_ext
+URL: https://gitlab.com/mtekman/CustomGenome
