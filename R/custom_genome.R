@@ -2,10 +2,17 @@
 ## required packages
 ####################################################################
 require(rtracklayer) ## For reading GTF via `import'
-require(Biostrings)  ## For reading FASTA via `DNASeqFromSet'
+require(Biostrings)  ## For reading FASTA via `readDNAStringSet'
 require(Rsubread)    ## For Mapping and aligning
 require(tools) ## For extracting basenames without ext
 
+#' @importFrom rtracklayer import
+#' @importFrom Biostrings readDNAStringSet
+#' @importFrom Rsubread buildindex align featureCounts
+#' @importFrom tools file_path_sans_ext
+#' @importFrom utils download.file
+NULL
+#> NULL
 
 #' @title Get the URLs for the genome files
 #' @description Dynamically generates URLs for the FASTA and GTF files of a
