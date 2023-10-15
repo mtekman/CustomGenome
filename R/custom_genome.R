@@ -6,11 +6,11 @@ require(Biostrings)  ## For reading FASTA via `readDNAStringSet'
 require(Rsubread)    ## For Mapping and aligning
 require(tools) ## For extracting basenames without ext
 
-#' @importFrom rtracklayer import
-#' @importFrom Biostrings readDNAStringSet
+#' @importFrom rtracklayer import export
+#' @importFrom Biostrings readDNAStringSet writeXStringSet width
 #' @importFrom Rsubread buildindex align featureCounts
 #' @importFrom tools file_path_sans_ext
-#' @importFrom utils download.file
+#' @importFrom utils download.file read.table write.table
 NULL
 #> NULL
 
@@ -86,44 +86,44 @@ get_genome_urls <- function(species = "mus_musculus",
 #' @param outfile Local file where there genome file exists.
 #' @return logical. If the file is consistent with that on the remote server.
 check_sum_matches <- function(url, outfile) {
-  parse_check_sum <- function(str) {
-    res_split <- unlist(strsplit(str, split = " "))
-    return(list(
-      sum1 = as.integer(res_split[[1]]),
-      sum2 = as.integer(res_split[[2]]),
-      name = res_split[[3]]
-    ))
-  }
-
-  get_check_sum <- function(url, outfile) {
-    checksums_gtf <- paste0(dirname(url), "/CHECKSUMS")
-    sumfile <- paste0(outfile, ".sum") ## this is not md5, it is unix "sum"
-    if (file.exists(sumfile)) {
-      message("Checksum: ", sumfile, " already exists")
-      res <- readLines(sumfile)
-    } else {
-      message("Downloading: ", sumfile)
-      download.file(checksums_gtf, sumfile)
-      tab <- readLines(sumfile)
-      res <- grep(basename(outfile), tab, value = TRUE)
-      if (length(res) > 1) {
-        message(res)
-        stop("Multiple matches found")
-      }
-      message("Writing:", sumfile)
-      writeLines(res, con = sumfile)
+    parse_check_sum <- function(str) {
+        res_split <- unlist(strsplit(str, split = " "))
+        return(list(
+            sum1 = as.integer(res_split[[1]]),
+            sum2 = as.integer(res_split[[2]]),
+            name = res_split[[3]]
+        ))
     }
-    return(parse_check_sum(res))
-  }
 
-  remote_sum <- get_check_sum(url, outfile)
-  local_sum <- parse_check_sum(
-    system(paste0("sum ", outfile), intern = TRUE)
-  )
-  all(
-    remote_sum$sum1 == local_sum$sum1,
-    remote_sum$sum2 == local_sum$sum2
-  )
+    get_check_sum <- function(url, outfile) {
+        checksums_gtf <- paste0(dirname(url), "/CHECKSUMS")
+        sumfile <- paste0(outfile, ".sum") ## this is not md5, it is unix "sum"
+        if (file.exists(sumfile)) {
+            message("Checksum: ", sumfile, " already exists")
+            res <- readLines(sumfile)
+        } else {
+            message("Downloading: ", sumfile)
+            download.file(checksums_gtf, sumfile)
+            tab <- readLines(sumfile)
+            res <- grep(basename(outfile), tab, value = TRUE)
+            if (length(res) > 1) {
+                message(res)
+                stop("Multiple matches found")
+            }
+            message("Writing:", sumfile)
+            writeLines(res, con = sumfile)
+        }
+        return(parse_check_sum(res))
+    }
+
+    remote_sum <- get_check_sum(url, outfile)
+    local_sum <- parse_check_sum(
+        system(paste0("sum ", outfile), intern = TRUE)
+    )
+    all(
+        remote_sum$sum1 == local_sum$sum1,
+        remote_sum$sum2 == local_sum$sum2
+    )
 }
 
 #' @title Get the Genome files
@@ -150,8 +150,12 @@ check_sum_matches <- function(url, outfile) {
 #'   location of the GTF file on disk. The second component \code{fasta}
 #'   contains the location of the FASTA primary assembly genome on disk.
 #' @examples
-#' mus_musc = get_genome_files(species="mus_musculus",
-#'                             output_folder="/genomes/")
+#' \donttest{
+#' mus_musc = get_genome_files(
+#'     species = "mus_musculus",
+#'     output_folder = "/genomes/"
+#' )
+#' }
 #' @export
 get_genome_files <- function(species = "mus_musculus",
                              output_folder = "genomes",
@@ -160,41 +164,41 @@ get_genome_files <- function(species = "mus_musculus",
                              build = NULL,
                              release = NULL,
                              urls_override = NULL) {
-  options(timeout = download_timeout)
-  if (!dir.exists(output_folder)) {
-    dir.create(output_folder)
-  }
-  if (is.null(urls_override)) {
-    urls <- get_genome_urls(species, build, release)
-  } else {
-    message("Using override URLs")
-    urls <- urls_override
-  }
+    options(timeout = download_timeout)
+    if (!dir.exists(output_folder)) {
+        dir.create(output_folder)
+    }
+    if (is.null(urls_override)) {
+        urls <- get_genome_urls(species, build, release)
+    } else {
+        message("Using override URLs")
+        urls <- urls_override
+    }
 
-  outfile <- list()
-  outfile$gtf <- file.path(output_folder, basename(urls$gtf))
-  outfile$fasta <- file.path(output_folder, basename(urls$fasta))
+    outfile <- list()
+    outfile$gtf <- file.path(output_folder, basename(urls$gtf))
+    outfile$fasta <- file.path(output_folder, basename(urls$fasta))
 
-  if (file.exists(outfile$gtf)) {
-    message("GTF file: ", outfile$gtf, " exists already")
-  } else {
-    message("Downloading: ", basename(outfile$gtf))
-    download.file(urls$gtf, outfile$gtf, method="wget")
-  }
-  if (!(check_sums && check_sum_matches(urls$gtf, outfile$gtf))) {
-    stop("Checksum for", outfile$gtf, "failed")
-  }
+    if (file.exists(outfile$gtf)) {
+        message("GTF file: ", outfile$gtf, " exists already")
+    } else {
+        message("Downloading: ", basename(outfile$gtf))
+        download.file(urls$gtf, outfile$gtf, method = "wget")
+    }
+    if (!(check_sums && check_sum_matches(urls$gtf, outfile$gtf))) {
+        stop("Checksum for", outfile$gtf, "failed")
+    }
 
-  if (file.exists(outfile$fasta)) {
-    message("FASTA file: ", outfile$gtf, " exists already, skipping")
-  } else {
-    message("Downloading: ", basename(outfile$fasta))
-    download.file(urls$fasta, outfile$fasta, method = "wget")
-  }
-  if (!(check_sums && check_sum_matches(urls$fasta, outfile$fasta))) {
-    stop("Checksum for", outfile$fasta, "failed")
-  }
-  return(outfile)
+    if (file.exists(outfile$fasta)) {
+        message("FASTA file: ", outfile$gtf, " exists already, skipping")
+    } else {
+        message("Downloading: ", basename(outfile$fasta))
+        download.file(urls$fasta, outfile$fasta, method = "wget")
+    }
+    if (!(check_sums && check_sum_matches(urls$fasta, outfile$fasta))) {
+        stop("Checksum for", outfile$fasta, "failed")
+    }
+    return(outfile)
 }
 
 #' @title Add new sequences to both GTF and FASTA files
@@ -212,9 +216,13 @@ get_genome_files <- function(species = "mus_musculus",
 #'   \code{fasta} contains the location of the new annotated FASTA primary
 #'   assembly genome on disk.
 #' @examples
-#' mus_musc = get_genome_files(species = "mus_musculus",
-#'                             output_folder = "/genomes/")
+#' \donttest{
+#' mus_musc = get_genome_files(
+#'     species = "mus_musculus",
+#'     output_folder = "/genomes/"
+#' )
 #' new_genome_files = add_seqs_to_gtf_and_fasta(mus_musc, "~/mynewseqs.fasta")
+#' }
 #' @export
 add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
   message("Inserting Sequences")
@@ -326,42 +334,50 @@ add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
 #'   filepaths, reads2 contains a vector of R2 read filepaths, and align_base
 #'   contains the basename of the BAM files (no path).
 #' @examples
-#' dir_lists = list(index=index.dir,
-#'                 fastq="1_fastqs",
-#'                 align="2_bams",
-#'                 count="3_counts")
-#' read_lists = prime_fastq_files(dir_lists$fastq, "_1.fq.gz", "_2.fq.gz",
-#'                                "-align.bam")
+#' \donttest{
+#' dir_lists = list(
+#'     index = index.dir,
+#'     fastq = "1_fastqs",
+#'     align = "2_bams",
+#'     count = "3_counts"
+#' )
+#' read_lists = prime_fastq_files(
+#'     dir_lists$fastq, "_1.fq.gz", "_2.fq.gz",
+#'     "-align.bam"
+#' )
+#' }
 #' @export
 prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
                               align_end = "align.bam") {
-  reads_r1 <- list.files(path = indir, pattern = paste0("*", r1_ending))
-  if (is.null(r2_ending)) {
-    r2_ending <- ""
-    reads_r2 <- NULL
-  } else {
-    reads_r2 <- list.files(path = indir, pattern = paste0("*", r2_ending))
-  }
-  readfile1 <- file.path(indir, reads_r1)
-  readfile2 <- {
-    if (is.null(reads_r2)) {
-      message("We assume that these are single-end reads")
-      c()
+    reads_r1 <- list.files(path = indir, pattern = paste0("*", r1_ending))
+    if (is.null(r2_ending)) {
+        r2_ending <- ""
+        reads_r2 <- NULL
     } else {
-      file.path(indir, reads_r2)
+        reads_r2 <- list.files(path = indir, pattern = paste0("*", r2_ending))
     }
-  }
-  if (!(all(file.exists(c(readfile1, readfile2))))) {
-    stop("Not all files exist...")
-  }
-  if (!(all(sub(r1_ending, "", readfile1) == sub(r2_ending, "", readfile2)))) {
-    stop("Could not match all R1 files to R2 files")
-  }
+    readfile1 <- file.path(indir, reads_r1)
+    readfile2 <- {
+        if (is.null(reads_r2)) {
+            message("We assume that these are single-end reads")
+            c()
+        } else {
+            file.path(indir, reads_r2)
+        }
+    }
+    if (!(all(file.exists(c(readfile1, readfile2))))) {
+        stop("Not all files exist...")
+    }
+    if (!(all(sub(r1_ending, "", readfile1) == sub(r2_ending, "", readfile2)))) {
+        stop("Could not match all R1 files to R2 files")
+    }
 
-  align_files_base <- basename(paste0(sub(r1_ending, "", readfile1), align_end))
+    align_files_base <- basename(paste0(sub(r1_ending, "", readfile1), align_end))
 
-  return(list(reads1 = readfile1, reads2 = readfile2,
-              align_base = align_files_base))
+    return(list(
+        reads1 = readfile1, reads2 = readfile2,
+        align_base = align_files_base
+    ))
 }
 
 
@@ -371,11 +387,15 @@ prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
 #' @param genome_fasta String depicting the filepath of the genome FASTA file.
 #' @return String depicting the filepath of the Subread index.
 #' @examples
+#' \donttest{
 #' source("custom_genome.R")
 #' new_genome_files = add_seqs_to_gtf_and_fasta(homo_sap, "GFP.fasta")
 #' index_dir = retrieve_index(new_genome_files$fasta)
-#' dir_lists = list(index=index_dir, fastq="1_fastqs", align="2_bams",
-#'                  count="3_counts")
+#' dir_lists = list(
+#'     index = index_dir, fastq = "1_fastqs", align = "2_bams",
+#'     count = "3_counts"
+#' )
+#' }
 #' @export
 retrieve_index <- function(genome_fasta) {
   index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(genome_fasta)),
@@ -385,7 +405,6 @@ retrieve_index <- function(genome_fasta) {
   } else {
     dir.create(index_dir)
     message("Building Index at: ", index_dir)
-    require(Rsubread)
     buildindex(basename = file.path(index_dir, "reference_index"),
                reference = genome_fasta)
   }
@@ -409,8 +428,10 @@ retrieve_index <- function(genome_fasta) {
 #' @return Void function. Output files are created at the location of the
 #'   `dir_lists$align'.
 #' @examples
+#' \donttest{
 #' read_lists = prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
 #' perform_alignment(dir_lists, read_lists)
+#' }
 #' @export
 perform_alignment <- function(dir_lists, read_lists,
                               type = "rna", nthreads = 30) {
@@ -421,7 +442,6 @@ perform_alignment <- function(dir_lists, read_lists,
   dir.create(dir_lists$index, recursive = TRUE, showWarnings = FALSE)
   dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
 
-  require(Rsubread)
   align(index = file.path(dir_lists$index, "reference_index"),
         readfile1 = read_lists$reads1,
         readfile2 = read_lists$reads2,
@@ -442,6 +462,7 @@ perform_alignment <- function(dir_lists, read_lists,
 #' @return A data frame depicting the total fragments and the mapped fragments,
 #'   along with the percentage mapped.
 #' @examples
+#' \donttest{
 #' dir_lists = list(
 #'     index = index_dir,
 #'     fastq = "1_fastqs_remote_mount",
@@ -451,6 +472,7 @@ perform_alignment <- function(dir_lists, read_lists,
 #' perform_alignment(dir_lists, read_lists)
 #' read_lists = prime_fastq_files(dir_lists$fastq, "_1.fq.gz", "_2.fq.gz")
 #' summarize_alignment(dir_lists$align, read_lists$align)
+#' }
 #' @export
 summarize_alignment <- function(dir_align, read_align) {
   bam_summary <- paste0(file.path(dir_align, read_align), ".summary")
@@ -506,6 +528,7 @@ summarize_alignment <- function(dir_align, read_align) {
 #' @return Void function. Output matrices and statistics are placed in the
 #'   `dir_lists$count' directory.
 #' @examples
+#' \donttest{
 #' dir_lists = list(index=index_dir, fastq="1_fastqs",
 #'                  align="2_bams", count="3_counts")
 #' read_lists = prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
@@ -513,7 +536,7 @@ summarize_alignment <- function(dir_align, read_align) {
 #' do_feature_counts(dir_lists, new_genome_files$gtf,
 #'     featuretype = "exon",
 #'     isPairedEnd = !is.null(read_lists$reads2))
-#' )
+#' }
 #' @export
 generate_count_matrix <- function(dir_lists, gtf_file,
                                   attrtype = "gene_name", featuretype = "exon",
@@ -526,7 +549,6 @@ generate_count_matrix <- function(dir_lists, gtf_file,
   names(bamfiles) <- basename(file_path_sans_ext(file_path_sans_ext(bamfiles)))
 
   message("Counting ", featuretype, " threads=", nthreads)
-  require(Rsubread)
   fc <- featureCounts(files = bamfiles,
                       nthreads = nthreads,
                       isPairedEnd = isPairedEnd,

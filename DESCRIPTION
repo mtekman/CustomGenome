@@ -1,7 +1,7 @@
 Package: CustomGenome
 Type: Package
 Title: Append Custom FASTA sequences to your Genome and Annotation Files for Downstream Mapping
-Version: 0.1.1
+Version: 0.99.1
 Authors@R: 
     c(person(given="Mehmet", family="Tekman",
       email = "mtekman89@gmail.com",
@@ -22,8 +22,9 @@ License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Depends: Rsubread (>= 2.14.2), Biostrings (>= 2.68.1), rtracklayer (>= 1.60.0), GenomicRanges (>= 1.52.0), GenomeInfoDb (>= 1.36.1)
+VignetteBuilder: knitr
 biocViews: Annotation, RNASeq, Alignment, MultipleSequenceAlignment, QualityControl, Preprocessing, Sequencing, DataImport, GeneExpression
-Imports: Rsubread, Biostrings
+Imports: Rsubread (>= 2.14.2), Biostrings (>= 2.68.1), rtracklayer (>= 1.60.0)
+Suggests: BiocStyle, knitr, rmarkdown
 URL: https://gitlab.com/mtekman/CustomGenome
 BugReports: https://gitlab.com/mtekman/CustomGenome/issues

@@ -443,3 +443,71 @@ generate_count_matrix(dir_lists,
     Stats written to: 3_counts/exon.gene_name.stats.tsv
     Counts written to: 3_counts/exon.gene_name.matrix.tsv
 
+# SessionInfo
+```R
+sessionInfo()
+```
+
+    R version 4.3.1 (2023-06-16)
+    Platform: x86_64-conda-linux-gnu (64-bit)
+    Running under: Arch Linux
+    
+    Matrix products: default
+    BLAS/LAPACK: /home/memo/micromamba/envs/generate-genome/lib/libopenblasp-r0.3.24.so;  LAPACK version 3.11.0
+    
+    locale:
+     [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C
+     [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8
+     [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8
+     [7] LC_PAPER=en_US.UTF-8       LC_NAME=C
+     [9] LC_ADDRESS=C               LC_TELEPHONE=C
+    [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C
+    
+    time zone: Europe/Zurich
+    tzcode source: system (glibc)
+    
+    attached base packages:
+    [1] tools     stats4    stats     graphics  grDevices utils     datasets
+    [8] methods   base
+    
+    other attached packages:
+     [1] Rsubread_2.14.2      Biostrings_2.68.1    XVector_0.40.0
+     [4] rtracklayer_1.60.0   GenomicRanges_1.52.0 GenomeInfoDb_1.36.1
+     [7] IRanges_2.34.1       S4Vectors_0.38.1     BiocGenerics_0.46.0
+    [10] BiocCheck_1.36.1
+    
+    loaded via a namespace (and not attached):
+     [1] SummarizedExperiment_1.30.2 stringdist_0.9.10
+     [3] rjson_0.2.21                xfun_0.40
+     [5] Biobase_2.60.0              lattice_0.21-8
+     [7] vctrs_0.6.3                 bitops_1.0-7
+     [9] generics_0.1.3              curl_5.0.2
+    [11] RUnit_0.4.32                parallel_4.3.1
+    [13] tibble_3.2.1                fansi_1.0.4
+    [15] RSQLite_2.3.1               blob_1.2.4
+    [17] pkgconfig_2.0.3             Matrix_1.6-1.1
+    [19] dbplyr_2.3.4                graph_1.78.0
+    [21] lifecycle_1.0.3             GenomeInfoDbData_1.2.10
+    [23] compiler_4.3.1              Rsamtools_2.16.0
+    [25] biocViews_1.68.1            codetools_0.2-19
+    [27] RCurl_1.98-1.12             yaml_2.3.7
+    [29] pillar_1.9.0                crayon_1.5.2
+    [31] BiocParallel_1.34.2         DelayedArray_0.26.6
+    [33] cachem_1.0.8                tidyselect_1.2.0
+    [35] dplyr_1.1.3                 purrr_1.0.2
+    [37] restfulr_0.0.15             fastmap_1.1.1
+    [39] grid_4.3.1                  cli_3.6.1
+    [41] magrittr_2.0.3              S4Arrays_1.0.4
+    [43] RBGL_1.76.0                 XML_3.99-0.14
+    [45] utf8_1.2.3                  withr_2.5.1
+    [47] filelock_1.0.2              bit64_4.0.5
+    [49] httr_1.4.7                  matrixStats_1.0.0
+    [51] bit_4.0.5                   memoise_2.0.1
+    [53] knitr_1.44                  BiocIO_1.10.0
+    [55] BiocFileCache_2.8.0         rlang_1.1.1
+    [57] glue_1.6.2                  DBI_1.1.3
+    [59] BiocManager_1.30.22         jsonlite_1.8.7
+    [61] rstudioapi_0.15.0           R6_2.5.1
+    [63] MatrixGenerics_1.12.2       GenomicAlignments_1.36.0
+    [65] zlibbioc_1.46.0
+
