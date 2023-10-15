@@ -1,18 +1,12 @@
 ####################################################################
 ## required packages
 ####################################################################
-require(rtracklayer) ## For reading GTF via `import'
-require(Biostrings)  ## For reading FASTA via `readDNAStringSet'
-require(Rsubread)    ## For Mapping and aligning
-require(tools) ## For extracting basenames without ext
 
 #' @importFrom rtracklayer import export
 #' @importFrom Biostrings readDNAStringSet writeXStringSet width
 #' @importFrom Rsubread buildindex align featureCounts
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils download.file read.table write.table
-NULL
-#> NULL
 
 #' @title Get the URLs for the genome files
 #' @description Dynamically generates URLs for the FASTA and GTF files of a
@@ -76,7 +70,6 @@ get_genome_urls <- function(species = "mus_musculus",
   return(list(gtf = gtf_url, fasta = fasta_url))
 }
 
-
 #' @title Compute Unix checksums for downloaded genome files
 #'
 #' @description This function checks for existing ".sum" files which are
@@ -86,44 +79,44 @@ get_genome_urls <- function(species = "mus_musculus",
 #' @param outfile Local file where there genome file exists.
 #' @return logical. If the file is consistent with that on the remote server.
 check_sum_matches <- function(url, outfile) {
-    parse_check_sum <- function(str) {
-        res_split <- unlist(strsplit(str, split = " "))
-        return(list(
-            sum1 = as.integer(res_split[[1]]),
-            sum2 = as.integer(res_split[[2]]),
-            name = res_split[[3]]
-        ))
-    }
+  parse_check_sum <- function(str) {
+    res_split <- unlist(strsplit(str, split = " "))
+    return(list(
+      sum1 = as.integer(res_split[[1]]),
+      sum2 = as.integer(res_split[[2]]),
+      name = res_split[[3]]
+    ))
+  }
 
-    get_check_sum <- function(url, outfile) {
-        checksums_gtf <- paste0(dirname(url), "/CHECKSUMS")
-        sumfile <- paste0(outfile, ".sum") ## this is not md5, it is unix "sum"
-        if (file.exists(sumfile)) {
-            message("Checksum: ", sumfile, " already exists")
-            res <- readLines(sumfile)
-        } else {
-            message("Downloading: ", sumfile)
-            download.file(checksums_gtf, sumfile)
-            tab <- readLines(sumfile)
-            res <- grep(basename(outfile), tab, value = TRUE)
-            if (length(res) > 1) {
-                message(res)
-                stop("Multiple matches found")
-            }
-            message("Writing:", sumfile)
-            writeLines(res, con = sumfile)
-        }
-        return(parse_check_sum(res))
+  get_check_sum <- function(url, outfile) {
+    checksums_gtf <- paste0(dirname(url), "/CHECKSUMS")
+    sumfile <- paste0(outfile, ".sum") ## this is not md5, it is unix "sum"
+    if (file.exists(sumfile)) {
+      message("Checksum: ", sumfile, " already exists")
+      res <- readLines(sumfile)
+    } else {
+      message("Downloading: ", sumfile)
+      download.file(checksums_gtf, sumfile)
+      tab <- readLines(sumfile)
+      res <- grep(basename(outfile), tab, value = TRUE)
+      if (length(res) > 1) {
+        message(res)
+        stop("Multiple matches found")
+      }
+      message("Writing:", sumfile)
+      writeLines(res, con = sumfile)
     }
+    return(parse_check_sum(res))
+  }
 
-    remote_sum <- get_check_sum(url, outfile)
-    local_sum <- parse_check_sum(
-        system(paste0("sum ", outfile), intern = TRUE)
-    )
-    all(
-        remote_sum$sum1 == local_sum$sum1,
-        remote_sum$sum2 == local_sum$sum2
-    )
+  remote_sum <- get_check_sum(url, outfile)
+  local_sum <- parse_check_sum(
+    system(paste0("sum ", outfile), intern = TRUE)
+  )
+  all(
+    remote_sum$sum1 == local_sum$sum1,
+    remote_sum$sum2 == local_sum$sum2
+  )
 }
 
 #' @title Get the Genome files
@@ -164,41 +157,108 @@ get_genome_files <- function(species = "mus_musculus",
                              build = NULL,
                              release = NULL,
                              urls_override = NULL) {
-    options(timeout = download_timeout)
-    if (!dir.exists(output_folder)) {
-        dir.create(output_folder)
-    }
-    if (is.null(urls_override)) {
-        urls <- get_genome_urls(species, build, release)
-    } else {
-        message("Using override URLs")
-        urls <- urls_override
-    }
+  options(timeout = download_timeout)
+  if (!dir.exists(output_folder)) {
+    dir.create(output_folder)
+  }
+  if (is.null(urls_override)) {
+    urls <- get_genome_urls(species, build, release)
+  } else {
+    message("Using override URLs")
+    urls <- urls_override
+  }
 
-    outfile <- list()
-    outfile$gtf <- file.path(output_folder, basename(urls$gtf))
-    outfile$fasta <- file.path(output_folder, basename(urls$fasta))
+  outfile <- list()
+  outfile$gtf <- file.path(output_folder, basename(urls$gtf))
+  outfile$fasta <- file.path(output_folder, basename(urls$fasta))
 
-    if (file.exists(outfile$gtf)) {
-        message("GTF file: ", outfile$gtf, " exists already")
-    } else {
-        message("Downloading: ", basename(outfile$gtf))
-        download.file(urls$gtf, outfile$gtf, method = "wget")
-    }
-    if (!(check_sums && check_sum_matches(urls$gtf, outfile$gtf))) {
-        stop("Checksum for", outfile$gtf, "failed")
-    }
+  if (file.exists(outfile$gtf)) {
+    message("GTF file: ", outfile$gtf, " exists already")
+  } else {
+    message("Downloading: ", basename(outfile$gtf))
+    download.file(urls$gtf, outfile$gtf, method = "wget")
+  }
+  if (!(check_sums && check_sum_matches(urls$gtf, outfile$gtf))) {
+    stop("Checksum for", outfile$gtf, "failed")
+  }
 
-    if (file.exists(outfile$fasta)) {
-        message("FASTA file: ", outfile$gtf, " exists already, skipping")
-    } else {
-        message("Downloading: ", basename(outfile$fasta))
-        download.file(urls$fasta, outfile$fasta, method = "wget")
-    }
-    if (!(check_sums && check_sum_matches(urls$fasta, outfile$fasta))) {
-        stop("Checksum for", outfile$fasta, "failed")
-    }
-    return(outfile)
+  if (file.exists(outfile$fasta)) {
+    message("FASTA file: ", outfile$gtf, " exists already, skipping")
+  } else {
+    message("Downloading: ", basename(outfile$fasta))
+    download.file(urls$fasta, outfile$fasta, method = "wget")
+  }
+  if (!(check_sums && check_sum_matches(urls$fasta, outfile$fasta))) {
+    stop("Checksum for", outfile$fasta, "failed")
+  }
+  return(outfile)
+}
+
+#' @title Filter sequences in a GTF for quality control
+#' @description Restrict available sequences to the same biotypes used
+#'   by CellRanger
+#'   \url{https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr}
+#' @param gtf_file String depicting the filename of a GTF file to modify
+#' @return A GTFFile object with filtered sequences.
+qc_filter_lines_of_gtf <- function(gtf_file) {
+    message("Importing GTF")
+    tabb <- as.data.frame(import(gtf_file))
+    ## -- Filter with CellRanger attributes
+    ## Use these biotypes, as suggested by CellRanger
+    keep_features <- tabb$gene_biotype %in%
+      c(
+        "protein_coding", "lincRNA", "antisense", "IG_LV_gene",
+        "IG_V_gene", "IG_V_pseudogene", "IG_D_gene", "IG_J_gene",
+        "IG_J_pseudogene", "IG_C_gene", "IG_C_pseudogene",
+        "TR_V_gene", "TR_V_pseudogene", "TR_D_gene", "TR_J_gene",
+        "TR_J_pseudogene", "TR_C_gene"
+      )
+    message("GTF features before:                ", nrow(tabb))
+    tabb <- tabb[keep_features, ]
+    message("         - after biotype filter:  ", nrow(tabb))
+    keep_genes <- !(is.na(tabb$gene_name) | is.null(tabb$gene_name))
+    tabb <- tabb[keep_genes, ]
+    message("         - after genename filter: ", nrow(tabb))
+    return(tabb)
+}
+
+#' @title Append Sequences to GTF file
+#' @description Insert all sequences as single Ensembl "protein_coding" exons
+#' @param gtf_table A GTFFile object.
+#' @param insert_seqs A DNAStringSet object of all sequences.
+#' @return A modified GTFFile object with appended sequences included.
+add_lines_to_gtf <- function(gtf_table, insert_seqs) {
+
+  new_gtf_entry <- function(dnaseq_entry) {
+    nam <- names(dnaseq_entry)
+    len <- width(dnaseq_entry)
+    src <- "ensembl"
+    biotype <- "protein_coding"
+    ver <- 1
+
+    return(c(
+      seqnames = nam, start = 1, end = len, width = len, strand = "+",
+      source = src, type = "exon", score = NA, phase = NA,
+      gene_id = nam, gene_version = ver, gene_name = nam,
+      gene_source = src, gene_biotype = biotype, transcript_id = nam,
+      transcript_version = ver, transcript_name = nam,
+      transcript_source = src, transcript_biotype = biotype, tag = NA,
+      transcript_support_level = NA, exon_number = 1, exon_id = nam,
+      exon_version = ver, ccds_id = NA, protein_id = NA,
+      protein_version = NA
+    ))
+  }
+  ## Include new sequence names
+  levels(gtf_table$seqnames) <- c(
+    levels(gtf_table$seqnames),
+    names(insert_seqs)
+  )
+  message("Appending Sequences to GTF:")
+  for (ind in seq_along(names(insert_seqs))) {
+    message("         - ", names(insert_seqs)[ind])
+    gtf_table <- rbind(gtf_table, new_gtf_entry(insert_seqs[ind]))
+  }
+  return(gtf_table)
 }
 
 #' @title Add new sequences to both GTF and FASTA files
@@ -244,63 +304,12 @@ add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
     message("GTF exists: '", new_gtf_file, "' doing nothing.")
   } else {
     ## GTF
-    message("Importing GTF")
-    tabb <- as.data.frame(import(genome_files$gtf))
-    ## -- Filter with CellRanger attributes
-    ## Use these biotypes, as suggested by CellRanger
-    keep_features <- tabb$gene_biotype %in%
-      c(
-        "protein_coding", "lincRNA", "antisense", "IG_LV_gene",
-        "IG_V_gene", "IG_V_pseudogene", "IG_D_gene", "IG_J_gene",
-        "IG_J_pseudogene", "IG_C_gene", "IG_C_pseudogene",
-        "TR_V_gene", "TR_V_pseudogene", "TR_D_gene", "TR_J_gene",
-        "TR_J_pseudogene", "TR_C_gene"
-      )
-    message("GTF features before:                ", nrow(tabb))
-    tabb <- tabb[keep_features, ]
-    message("         - after biotype filter:  ", nrow(tabb))
-    keep_genes <- !(is.na(tabb$gene_name) | is.null(tabb$gene_name))
-    tabb <- tabb[keep_genes, ]
-    message("         - after genename filter: ", nrow(tabb))
-
-    message("Appending Sequences to GTF:")
-    new_gtf_entry <- function(dnaseq_entry) {
-      nam <- names(dnaseq_entry)
-      len <- width(dnaseq_entry)
-      src <- "ensembl"
-      biotype <- "protein_coding"
-      ver <- 1
-
-      return(c(
-        seqnames = nam, start = 1, end = len, width = len, strand = "+",
-        source = src, type = "exon", score = NA, phase = NA,
-        gene_id = nam, gene_version = ver, gene_name = nam,
-        gene_source = src, gene_biotype = biotype, transcript_id = nam,
-        transcript_version = ver, transcript_name = nam,
-        transcript_source = src, transcript_biotype = biotype, tag = NA,
-        transcript_support_level = NA, exon_number = 1, exon_id = nam,
-        exon_version = ver, ccds_id = NA, protein_id = NA,
-        protein_version = NA
-      ))
-    }
-
-    add_lines_to_gtf <- function(gtf_table, insert_seqs) {
-      levels(gtf_table$seqnames) <- c(
-        levels(gtf_table$seqnames),
-        names(insert_seqs)
-      )
-      for (ind in seq_along(names(insert_seqs))) {
-        message("         - ", names(insert_seqs)[ind])
-        gtf_table <- rbind(gtf_table, new_gtf_entry(insert_seqs[ind]))
-      }
-      return(gtf_table)
-    }
-
-    tab2 <- add_lines_to_gtf(tabb, insert_seqs)
+    tabb <- qc_filter_lines_of_gtf(genome_files$gtf)
+    tabb <- add_lines_to_gtf(tabb, insert_seqs)
 
     message("Saving new GTF file to: ", new_gtf_file)
     gtf_gz <- gzfile(new_gtf_file, "w")
-    export(tab2, con = gtf_gz)
+    export(tabb, con = gtf_gz)
     close(gtf_gz)
   }
 
@@ -349,37 +358,36 @@ add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
 #' @export
 prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
                               align_end = "align.bam") {
-    reads_r1 <- list.files(path = indir, pattern = paste0("*", r1_ending))
-    if (is.null(r2_ending)) {
-        r2_ending <- ""
-        reads_r2 <- NULL
+  reads_r1 <- list.files(path = indir, pattern = paste0("*", r1_ending))
+  if (is.null(r2_ending)) {
+    r2_ending <- ""
+    reads_r2 <- NULL
+  } else {
+    reads_r2 <- list.files(path = indir, pattern = paste0("*", r2_ending))
+  }
+  readfile1 <- file.path(indir, reads_r1)
+  readfile2 <- {
+    if (is.null(reads_r2)) {
+      message("We assume that these are single-end reads")
+      c()
     } else {
-        reads_r2 <- list.files(path = indir, pattern = paste0("*", r2_ending))
+      file.path(indir, reads_r2)
     }
-    readfile1 <- file.path(indir, reads_r1)
-    readfile2 <- {
-        if (is.null(reads_r2)) {
-            message("We assume that these are single-end reads")
-            c()
-        } else {
-            file.path(indir, reads_r2)
-        }
-    }
-    if (!(all(file.exists(c(readfile1, readfile2))))) {
-        stop("Not all files exist...")
-    }
-    if (!(all(sub(r1_ending, "", readfile1) == sub(r2_ending, "", readfile2)))) {
-        stop("Could not match all R1 files to R2 files")
-    }
+  }
+  if (!(all(file.exists(c(readfile1, readfile2))))) {
+    stop("Not all files exist...")
+  }
+  if (!(all(sub(r1_ending, "", readfile1) == sub(r2_ending, "", readfile2)))) {
+    stop("Could not match all R1 files to R2 files")
+  }
 
-    align_files_base <- basename(paste0(sub(r1_ending, "", readfile1), align_end))
+  align_files_base <- basename(paste0(sub(r1_ending, "", readfile1), align_end))
 
-    return(list(
-        reads1 = readfile1, reads2 = readfile2,
-        align_base = align_files_base
-    ))
+  return(list(
+    reads1 = readfile1, reads2 = readfile2,
+    align_base = align_files_base
+  ))
 }
-
 
 #' @title Generate or Retrieve Subread Index
 #' @description Build a Subread index at the directory location of your genome
@@ -410,8 +418,6 @@ retrieve_index <- function(genome_fasta) {
   }
   return(index_dir)
 }
-
-
 
 #' @title Perform alignment of FASTQ files against Reference via Subread
 #' @description Align FASTQ reads into BAM files via Subreads' `align' function.
@@ -505,7 +511,6 @@ summarize_alignment <- function(dir_align, read_align) {
     "Percentage_Mapped"
   ), ])))
 }
-
 
 #' @title Generate Count Matrix from Aligned BAM files
 #' @description Perform feature counts on aligned data and produce a count

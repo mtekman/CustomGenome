@@ -443,7 +443,8 @@ generate_count_matrix(dir_lists,
     Stats written to: 3_counts/exon.gene_name.stats.tsv
     Counts written to: 3_counts/exon.gene_name.matrix.tsv
 
-# SessionInfo
+# Session info
+
 ```R
 sessionInfo()
 ```
@@ -451,9 +452,6 @@ sessionInfo()
     R version 4.3.1 (2023-06-16)
     Platform: x86_64-conda-linux-gnu (64-bit)
     Running under: Arch Linux
-    
-    Matrix products: default
-    BLAS/LAPACK: /home/memo/micromamba/envs/generate-genome/lib/libopenblasp-r0.3.24.so;  LAPACK version 3.11.0
     
     locale:
      [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C
@@ -510,4 +508,5 @@ sessionInfo()
     [61] rstudioapi_0.15.0           R6_2.5.1
     [63] MatrixGenerics_1.12.2       GenomicAlignments_1.36.0
     [65] zlibbioc_1.46.0
+
 
