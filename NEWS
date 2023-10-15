@@ -1,0 +1,12 @@
+CHANGES IN VERSION 0.1.*
+------------------------
+
+NEW FEATURES
+
+    o get_genome_files() to download FASTA and GTF files
+    o add_seqs_to_gtf_and_fasta() to annotate user sequences to genome files
+    o prime_fastq_files() prepare FASTQ sequences for alignment
+    o retrieve_index() build and retrieve alignment index
+    o perform_alignment() align FASTQ files to retrieved index
+    o summarize_alignment() summarize alignment statistics
+    o generate_count_matrix() quantify features from aligned files

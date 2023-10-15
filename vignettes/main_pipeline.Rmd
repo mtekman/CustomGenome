@@ -105,15 +105,19 @@ in a local "genomes" folder. Using the `get_genome_files` function.
 
 
 ```R
-homo_sap = get_genome_files(species="homo_sapiens", 
+homo_sap = get_genome_files(species="homo_sapiens",
                            output_folder="genomes")
 homo_sap
 ```
 
-    > GTF file: genomes/Homo_sapiens.GRCh38.105.gtf.gz exists already    
-    > Checksum: genomes/Homo_sapiens.GRCh38.105.gtf.gz.sum already exists
-    > FASTA file: genomes/Homo_sapiens.GRCh38.105.gtf.gz exists already, skipping
-    > Checksum: genomes/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz.sum already exists
+    > GTF file: genomes/Homo_sapiens.GRCh38.105.gtf.gz
+    >           exists already, skipping
+    > Checksum: genomes/Homo_sapiens.GRCh38.105.gtf.gz.sum
+    >           exists already
+    > FASTA file: genomes/Homo_sapiens.GRCh38.105.gtf.gz
+    >             exists already, skipping
+    > Checksum: genomes/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz.sum
+    >           exists already
 
 
 The output is stored in the `homo_sap` variable which returns an
@@ -161,7 +165,7 @@ This is the part where we insert our user-FASTA exogenous sequences
 into the genome sequence and annotation files.
 
 Each new sequence in the user-FASTA file will be added as a new "gene"
-with a single "exon" that spans the entire sequence given. 
+with a single "exon" that spans the entire sequence given.
 
 This is performed via the function `add_seqs_to_gtf_and_fasta` which
 takes as input the output from the `get_genome_files` function above,
@@ -202,7 +206,7 @@ $gtf   : 'genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz'
 $fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_Two_Three.fa.gz'
 ```
 
-## Performing alignment and quantification via Rsubread of this new genomic reference.
+## Performing alignment and quantification of this new genomic reference.
 
 At this stage we have all the custom generated reference files that we
 need to perform quantification.
@@ -233,7 +237,8 @@ index_dir
 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index'
 ```
 
-(This takes about an hour, no way to speed it up or for it to use multiple cores.)
+(This takes about an hour, no way to speed it up or for it to use
+multiple cores.)
 
 ### Priming Input FASTQ
 
@@ -290,63 +295,92 @@ machine, this takes 10-20 minutes.
 ```R
 perform_alignment(dir_lists, read_lists)
 ```
-           Rsubread 2.14.2
+            Rsubread 2.14.2
     
-    //================================= setting ==================================\\
-    ||                                                                            ||
-    || Function      : Read alignment (RNA-Seq)                                   ||
-    || Input file 1  : Group1_1_R1.fastq.gz                                       ||
-    || Input file 2  : Group1_1_R2.fastq.gz                                       ||
-    || Output file   : Group1_1_R1.fastq.gz-align.bam (BAM)                       ||
-    || Index name    : reference_index                                            ||
-    ||                                                                            ||
-    ||                    ------------------------------------                    ||
-    ||                                                                            ||
-    ||                               Threads : 30                                 ||
-    ||                          Phred offset : 33                                 ||
-    ||               # of extracted subreads : 10                                 ||
-    ||                        Min read1 vote : 3                                  ||
-    ||                        Min read2 vote : 1                                  ||
-    ||                     Max fragment size : 600                                ||
-    ||                                                                            ||
-    ||             Total fragments : 52,643,874                                   ||
-    ||                      Mapped : 51,740,759 (98.3%)                           ||
-    ||             Uniquely mapped : 50,119,180                                   ||
-    ||               Multi-mapping : 1,621,579                                    ||
-    ||                                                                            ||
-    ||                    Unmapped : 903,115                                      ||
-    ||                                                                            ||
-    ||             Properly paired : 39,616,581                                   ||
-    ||         Not properly paired : 12,124,178                                   ||
-    ||                   Singleton : 2,174,913                                    ||
-    ||                    Chimeric : 3,153,831                                    ||
-    ||       Unexpected strandness : 193,036                                      ||
-    ||  Unexpected fragment length : 5,837,741                                    ||
-    ||       Unexpected read order : 764,657                                      ||
-    ||                                                                            ||
-    ||                      Indels : 201,441                                      ||
-    ||                                                                            ||
-    ||                Running time : 4.4 minutes                                  ||
-    ||                                                                            ||
-    \\============================================================================//
+    //================================= setting ==============================\\
+    ||                                                                        ||
+    || Function      : Read alignment (RNA-Seq)                               ||
+    || Input file 1  : Group1_1_R1.fastq.gz                                   ||
+    || Input file 2  : Group1_1_R2.fastq.gz                                   ||
+    || Output file   : Group1_1_R1.fastq.gz-align.bam (BAM)                   ||
+    || Index name    : reference_index                                        ||
+    ||                                                                        ||
+    ||                    ------------------------------------                ||
+    ||                                                                        ||
+    ||                               Threads : 30                             ||
+    ||                          Phred offset : 33                             ||
+    ||               # of extracted subreads : 10                             ||
+    ||                        Min read1 vote : 3                              ||
+    ||                        Min read2 vote : 1                              ||
+    ||                     Max fragment size : 600                            ||
+    ||                                                                        ||
+    ||             Total fragments : 52,643,874                               ||
+    ||                      Mapped : 51,740,759 (98.3%)                       ||
+    ||             Uniquely mapped : 50,119,180                               ||
+    ||               Multi-mapping : 1,621,579                                ||
+    ||                                                                        ||
+    ||                    Unmapped : 903,115                                  ||
+    ||                                                                        ||
+    ||             Properly paired : 39,616,581                               ||
+    ||         Not properly paired : 12,124,178                               ||
+    ||                   Singleton : 2,174,913                                ||
+    ||                    Chimeric : 3,153,831                                ||
+    ||       Unexpected strandness : 193,036                                  ||
+    ||  Unexpected fragment length : 5,837,741                                ||
+    ||       Unexpected read order : 764,657                                  ||
+    ||                                                                        ||
+    ||                      Indels : 201,441                                  ||
+    ||                                                                        ||
+    ||                Running time : 4.4 minutes                              ||
+    ||                                                                        ||
+    \\========================================================================//
     
 
-|                                     | Group1_1 | Group1_2 | Group1_3 | Group2_1 | Group2_2 | Group2_3 | Group3_1 | Group3_2 | Group3_3 |
-|------------------------------------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
-|                 **Total_fragments** | 42515177 | 54629686 | 53989034 | 76791529 | 61748197 | 54436875 | 50911032 | 55296965 | 52643874 |
-|                **Mapped_fragments** | 41714826 | 53845492 | 53112104 | 75504806 | 60610611 | 53494266 | 49987297 | 54252509 | 51740759 |
-|       **Uniquely_mapped_fragments** | 40506439 | 52291020 | 51566978 | 72277542 | 58725145 | 51896523 | 48559049 | 52544836 | 50119180 |
-|         **Multi_mapping_fragments** | 1208387  | 1554472  | 1545126  | 3227264  | 1885466  | 1597743  | 1428248  | 1707673  | 1621579  |
-|              **Unmapped_fragments** | 800351   | 784194   | 876930   | 1286723  | 1137586  | 942609   | 923735   | 1044456  | 903115   |
-|       **Properly_paired_fragments** | 32582893 | 42138280 | 40613433 | 59163258 | 46670208 | 41181233 | 39208458 | 41584645 | 39616581 |
-|             **Singleton_fragments** | 1564504  | 1754361  | 2109739  | 2599890  | 2729367  | 2303469  | 1914953  | 2304702  | 2174913  |
-|     **More_than_one_chr_fragments** | 1769660  | 2176411  | 2722550  | 3289393  | 3616468  | 2985652  | 1871765  | 3362698  | 3153831  |
-| **Unexpected_strandness_fragments** | 127341   | 161925   | 184220   | 229782   | 221355   | 189316   | 142358   | 203971   | 193036   |
-|      **Unexpected_template_length** | 5115064  | 6899004  | 6753969  | 9139980  | 6350098  | 6045815  | 6090996  | 6002442  | 5837741  |
-|                **Inversed_mapping** | 555364   | 715511   | 728193   | 1082503  | 1023115  | 788781   | 758767   | 794051   | 764657   |
-|                          **Indels** | 170921   | 211140   | 206206   | 272347   | 221484   | 204585   | 196881   | 207353   | 201441   |
+|                                     | Group1_1 | Group1_2 | Group1_3 |
+|------------------------------------:|---------:|---------:|---------:|
+|                 **Total_fragments** | 42515177 | 54629686 | 53989034 |
+|                **Mapped_fragments** | 41714826 | 53845492 | 53112104 |
+|       **Uniquely_mapped_fragments** | 40506439 | 52291020 | 51566978 |
+|         **Multi_mapping_fragments** | 1208387  | 1554472  | 1545126  |
+|              **Unmapped_fragments** | 800351   | 784194   | 876930   |
+|       **Properly_paired_fragments** | 32582893 | 42138280 | 40613433 |
+|             **Singleton_fragments** | 1564504  | 1754361  | 2109739  |
+|     **More_than_one_chr_fragments** | 1769660  | 2176411  | 2722550  |
+| **Unexpected_strandness_fragments** | 127341   | 161925   | 184220   |
+|      **Unexpected_template_length** | 5115064  | 6899004  | 6753969  |
+|                **Inversed_mapping** | 555364   | 715511   | 728193   |
+|                          **Indels** | 170921   | 211140   | 206206   |
 
 
+|                                     | Group2_1 | Group2_2 | Group2_3 |
+|------------------------------------:|---------:|---------:|---------:|
+|                 **Total_fragments** | 76791529 | 61748197 | 54436875 |
+|                **Mapped_fragments** | 75504806 | 60610611 | 53494266 |
+|       **Uniquely_mapped_fragments** | 72277542 | 58725145 | 51896523 |
+|         **Multi_mapping_fragments** | 3227264  | 1885466  | 1597743  |
+|              **Unmapped_fragments** | 1286723  | 1137586  | 942609   |
+|       **Properly_paired_fragments** | 59163258 | 46670208 | 41181233 |
+|             **Singleton_fragments** | 2599890  | 2729367  | 2303469  |
+|     **More_than_one_chr_fragments** | 3289393  | 3616468  | 2985652  |
+| **Unexpected_strandness_fragments** | 229782   | 221355   | 189316   |
+|      **Unexpected_template_length** | 9139980  | 6350098  | 6045815  |
+|                **Inversed_mapping** | 1082503  | 1023115  | 788781   |
+|                          **Indels** | 272347   | 221484   | 204585   |
+
+|                                     |Group3_1 | Group3_2 | Group3_3 |
+|------------------------------------:|--------:|---------:|---------:|
+|                 **Total_fragments** |50911032 | 55296965 | 52643874 |
+|                **Mapped_fragments** |49987297 | 54252509 | 51740759 |
+|       **Uniquely_mapped_fragments** |48559049 | 52544836 | 50119180 |
+|         **Multi_mapping_fragments** |1428248  | 1707673  | 1621579  |
+|              **Unmapped_fragments** |923735   | 1044456  | 903115   |
+|       **Properly_paired_fragments** |39208458 | 41584645 | 39616581 |
+|             **Singleton_fragments** |1914953  | 2304702  | 2174913  |
+|     **More_than_one_chr_fragments** |1871765  | 3362698  | 3153831  |
+| **Unexpected_strandness_fragments** |142358   | 203971   | 193036   |
+|      **Unexpected_template_length** |6090996  | 6002442  | 5837741  |
+|                **Inversed_mapping** |758767   | 794051   | 764657   |
+|                          **Indels** |196881   | 207353   | 201441   |
 
 ```R
 summarize_alignment(dir_lists$align, read_lists$align)
@@ -373,7 +407,9 @@ summarize_alignment(dir_lists$align, read_lists$align)
 All we need to do is specify the feature type:
 
 ```bash
-cat genomes/Homo_sapiens.GRCh38.105_with_GFP_TB.gtf | awk '{print $3}' | sort | uniq -c
+cat genomes/Homo_sapiens.GRCh38.105_with_GFP_TB.gtf \
+    | awk '{print $3}' \
+    | sort | uniq -c
 
  838953 CDS
 1303844 exon
@@ -390,55 +426,55 @@ Our annotated sequences will appear only as exons in a new gene, so it
 makes sense to specify "exon" as our feature of interest.
 
 ```R
-generate_count_matrix(dir_lists, 
-                      new_genome_files$gtf, 
+generate_count_matrix(dir_lists,
+                      new_genome_files$gtf,
                       featuretype = "exon")
 ```
 
 
     Counting exon threads=30
     
-   
-           Rsubread 2.14.2
-
-    //========================== featureCounts setting ===========================\\
-    ||                                                                            ||
-    ||             Input files : 9 BAM files                                      ||
-    ||                                                                            ||
-    ||                           Group1_1_align.bam                               ||
-    ||                           Group3_3_align.bam                               ||
-    ||                                                                            ||
-    ||              Paired-end : yes                                              ||
-    ||        Count read pairs : yes                                              ||
-    ||              Annotation : Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ( ... ||
-    ||      Dir for temp files : .                                                ||
-    ||       Junction Counting : <output_file>.jcounts                            ||
-    ||                 Threads : 30                                               ||
-    ||                   Level : meta-feature level                               ||
-    ||      Multimapping reads : counted                                          ||
-    || Multi-overlapping reads : not counted                                      ||
-    ||   Min overlapping bases : 1                                                ||
-    ||                                                                            ||
-    \\============================================================================//
     
-    //================================= Running ==================================\\
-    ||                                                                            ||
-    || Load annotation file Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ...        ||
-    ||    Features : 1293866                                                      ||
-    ||    Meta-features : 20004                                                   ||
-    ||    Chromosomes/contigs : 27                                                ||
-    ||                                                                            ||
-    || Process BAM file Group3_3_align.bam...                                     ||
-    ||    Paired-end reads are included.                                          ||
-    ||    Total alignments : 52643874                                             ||
-    ||    Successfully assigned alignments : 42705701 (81.1%)                     ||
-    ||    Running time : 0.13 minutes                                             ||
-    ||                                                                            ||
-    || Write the final count table.                                               ||
-    || Write the junction count table.                                            ||
-    || Write the read assignment summary.                                         ||
-    ||                                                                            ||
-    \\============================================================================//
+           Rsubread 2.14.2
+    
+    //========================== featureCounts setting =======================\\
+    ||                                                                        ||
+    ||             Input files : 9 BAM files                                  ||
+    ||                                                                        ||
+    ||                           Group1_1_align.bam                           ||
+    ||                           Group3_3_align.bam                           ||
+    ||                                                                        ||
+    ||              Paired-end : yes                                          ||
+    ||        Count read pairs : yes                                          ||
+    ||              Annotation : Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ( ||
+    ||      Dir for temp files : .                                            ||
+    ||       Junction Counting : <output_file>.jcounts                        ||
+    ||                 Threads : 30                                           ||
+    ||                   Level : meta-feature level                           ||
+    ||      Multimapping reads : counted                                      ||
+    || Multi-overlapping reads : not counted                                  ||
+    ||   Min overlapping bases : 1                                            ||
+    ||                                                                        ||
+    \\========================================================================//
+    
+    //================================= Running ==============================\\
+    ||                                                                        ||
+    || Load annotation file Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ...    ||
+    ||    Features : 1293866                                                  ||
+    ||    Meta-features : 20004                                               ||
+    ||    Chromosomes/contigs : 27                                            ||
+    ||                                                                        ||
+    || Process BAM file Group3_3_align.bam...                                 ||
+    ||    Paired-end reads are included.                                      ||
+    ||    Total alignments : 52643874                                         ||
+    ||    Successfully assigned alignments : 42705701 (81.1%)                 ||
+    ||    Running time : 0.13 minutes                                         ||
+    ||                                                                        ||
+    || Write the final count table.                                           ||
+    || Write the junction count table.                                        ||
+    || Write the read assignment summary.                                     ||
+    ||                                                                        ||
+    \\========================================================================//
     
     Stats written to: 3_counts/exon.gene_name.stats.tsv
     Counts written to: 3_counts/exon.gene_name.matrix.tsv

@@ -92,7 +92,7 @@ check_sum_matches <- function(url, outfile) {
     checksums_gtf <- paste0(dirname(url), "/CHECKSUMS")
     sumfile <- paste0(outfile, ".sum") ## this is not md5, it is unix "sum"
     if (file.exists(sumfile)) {
-      message("Checksum: ", sumfile, " already exists")
+      message("Checksum: ", sumfile, "\n          exists already")
       res <- readLines(sumfile)
     } else {
       message("Downloading: ", sumfile)
@@ -173,7 +173,7 @@ get_genome_files <- function(species = "mus_musculus",
   outfile$fasta <- file.path(output_folder, basename(urls$fasta))
 
   if (file.exists(outfile$gtf)) {
-    message("GTF file: ", outfile$gtf, " exists already")
+    message("GTF file: ", outfile$gtf, "\n          exists already")
   } else {
     message("Downloading: ", basename(outfile$gtf))
     download.file(urls$gtf, outfile$gtf, method = "wget")
@@ -183,7 +183,7 @@ get_genome_files <- function(species = "mus_musculus",
   }
 
   if (file.exists(outfile$fasta)) {
-    message("FASTA file: ", outfile$gtf, " exists already, skipping")
+    message("FASTA file: ", outfile$gtf, "\n            exists already")
   } else {
     message("Downloading: ", basename(outfile$fasta))
     download.file(urls$fasta, outfile$fasta, method = "wget")
