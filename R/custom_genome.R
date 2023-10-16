@@ -18,6 +18,10 @@
 #'   `GRCh38' for `homo_sapiens'.
 #' @param release String. The release version for that build. If \code{NULL}, it
 #'   will use the latest release "105".
+#' @param fasta_type String. The type of genomic FASTA sequence to retrieve.
+#'   Default is "dna.primary_assembly",
+#' @param gtf_type String. The type of genomic GTF file to retrieve.
+#'   Default is "gtf", Other examples are "chr.gtf" or "abinitio.gtf".
 #' @param ensembl_base_url String depicting the base url of the Ensembl
 #'   releases. Default is "http://ftp.ensembl.org/pub".
 #' @return A list of two components. The first component \code{gtf} contains the
@@ -25,6 +29,8 @@
 #'   the URL of the FASTA primary assembly genome on server.
 get_genome_urls <- function(species = "mus_musculus",
                             build = NULL, release = NULL,
+                            fasta_type = "dna.primary_assembly",
+                            gtf_type = "gtf",
                             ensembl_base_url = "http://ftp.ensembl.org/pub") {
 
   ## If other species are desired, they should be overridden directly in the
@@ -42,7 +48,8 @@ get_genome_urls <- function(species = "mus_musculus",
     )
     paste0(
       ensembl_base_url, "/release-", release, "/gtf/",
-      species, "/", upper_species, ".", build, ".", release, ".gtf.gz"
+      species, "/", upper_species, ".", build, ".",
+      release, ".", gtf_type, ".gz"
     )
   }
 
@@ -53,8 +60,8 @@ get_genome_urls <- function(species = "mus_musculus",
     )
     paste0(
       ensembl_base_url, "/release-", release, "/fasta/",
-      species, "/dna/", upper_species, ".", build,
-      ".dna.primary_assembly.fa.gz"
+      species, "/dna/", upper_species, ".", build, ".",
+      fasta_type, ".fa.gz"
     )
   }
 
@@ -80,7 +87,7 @@ get_genome_urls <- function(species = "mus_musculus",
 #' @return logical. If the file is consistent with that on the remote server.
 check_sum_matches <- function(url, outfile) {
   parse_check_sum <- function(str) {
-    res_split <- unlist(strsplit(str, split = " "))
+    res_split <- unlist(strsplit(str, split = "\\s+"))
     return(list(
       sum1 = as.integer(res_split[[1]]),
       sum2 = as.integer(res_split[[2]]),
@@ -130,15 +137,11 @@ check_sum_matches <- function(url, outfile) {
 #'   increase this to 10000. Default is 1000
 #' @param check_sums logical. Perform consistency checks on downloaded
 #'   files. Default is \code{TRUE}
-#' @param build String. The build for the species of interest. If \code{NULL},
-#'   it will use the latest build which is `GRCm39' for `mus_musculus' and
-#'   `GRCh38' for `homo_sapiens'.
-#' @param release String. The release version for that build. If \code{NULL}, it
-#'   will use the latest release "105".
 #' @param urls_override A list of strings with two components: `gtf' an URL for
 #'   the Ensembl GTF file, `fasta' an URL for the Ensemble FASTA file. This
 #'   parameter overrides the species, build, and release parameters. Default
 #'   value is \code{NULL}.
+#' @param ... Arguments to be passed onto \code{get_genome_urls}.
 #' @return A list of two components. The first component \code{gtf} contains the
 #'   location of the GTF file on disk. The second component \code{fasta}
 #'   contains the location of the FASTA primary assembly genome on disk.
@@ -154,15 +157,13 @@ get_genome_files <- function(species = "mus_musculus",
                              output_folder = "genomes",
                              download_timeout = 1000,
                              check_sums = TRUE,
-                             build = NULL,
-                             release = NULL,
-                             urls_override = NULL) {
+                             urls_override = NULL, ...) {
   options(timeout = download_timeout)
   if (!dir.exists(output_folder)) {
     dir.create(output_folder)
   }
   if (is.null(urls_override)) {
-    urls <- get_genome_urls(species, build, release)
+    urls <- get_genome_urls(...)
   } else {
     message("Using override URLs")
     urls <- urls_override
@@ -199,27 +200,30 @@ get_genome_files <- function(species = "mus_musculus",
 #'   by CellRanger
 #'   \url{https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr}
 #' @param gtf_file String depicting the filename of a GTF file to modify
+#' @param wanted_biotypes An unnamed vector of biotypes to keep. Default uses the full
+#'   
 #' @return A GTFFile object with filtered sequences.
-qc_filter_lines_of_gtf <- function(gtf_file) {
-    message("Importing GTF")
-    tabb <- as.data.frame(import(gtf_file))
-    ## -- Filter with CellRanger attributes
-    ## Use these biotypes, as suggested by CellRanger
-    keep_features <- tabb$gene_biotype %in%
-      c(
-        "protein_coding", "lincRNA", "antisense", "IG_LV_gene",
-        "IG_V_gene", "IG_V_pseudogene", "IG_D_gene", "IG_J_gene",
-        "IG_J_pseudogene", "IG_C_gene", "IG_C_pseudogene",
-        "TR_V_gene", "TR_V_pseudogene", "TR_D_gene", "TR_J_gene",
-        "TR_J_pseudogene", "TR_C_gene"
-      )
-    message("GTF features before:                ", nrow(tabb))
-    tabb <- tabb[keep_features, ]
-    message("         - after biotype filter:  ", nrow(tabb))
-    keep_genes <- !(is.na(tabb$gene_name) | is.null(tabb$gene_name))
-    tabb <- tabb[keep_genes, ]
-    message("         - after genename filter: ", nrow(tabb))
-    return(tabb)
+qc_filter_lines_of_gtf <- function(gtf_file,
+                                   wanted_biotypes = c(
+                                     "protein_coding", "lincRNA", "antisense",
+                                     "IG_LV_gene", "IG_V_gene", "IG_V_pseudogene",
+                                     "IG_D_gene", "IG_J_gene", "IG_J_pseudogene",
+                                     "IG_C_gene", "IG_C_pseudogene", "TR_V_gene",
+                                     "TR_V_pseudogene", "TR_D_gene", "TR_J_gene",
+                                     "TR_J_pseudogene", "TR_C_gene")) {
+  message("Importing GTF")
+  tabb <- as.data.frame(import(gtf_file))
+  ## -- Filter with CellRanger attributes
+  ## Use these biotypes, as suggested by CellRanger
+  keep_features <- tabb$gene_biotype %in% wanted_biotypes
+  
+  message("GTF features before:                ", nrow(tabb))
+  tabb <- tabb[keep_features, ]
+  message("         - after biotype filter:  ", nrow(tabb))
+  keep_genes <- !(is.na(tabb$gene_name) | is.null(tabb$gene_name))
+  tabb <- tabb[keep_genes, ]
+  message("         - after genename filter: ", nrow(tabb))
+  return(tabb)
 }
 
 #' @title Append Sequences to GTF file
