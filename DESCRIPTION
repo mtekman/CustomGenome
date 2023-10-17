@@ -25,6 +25,11 @@ RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 biocViews: Annotation, RNASeq, Alignment, MultipleSequenceAlignment, QualityControl, Preprocessing, Sequencing, DataImport, GeneExpression
 Imports: Rsubread (>= 2.14.2), Biostrings (>= 2.68.1), rtracklayer (>= 1.60.0), GenomicRanges (>= 1.52.0), tools, utils
-Suggests: BiocStyle, knitr, rmarkdown
+Suggests: 
+    BiocStyle,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
 URL: https://gitlab.com/mtekman/CustomGenome
 BugReports: https://gitlab.com/mtekman/CustomGenome/issues
+Config/testthat/edition: 3
