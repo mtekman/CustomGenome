@@ -4,6 +4,7 @@
 
 #' @importFrom rtracklayer import export
 #' @importFrom Biostrings readDNAStringSet writeXStringSet width
+#' @importFrom GenomicRanges GRanges
 #' @importFrom Rsubread buildindex align featureCounts
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils download.file read.table write.table
@@ -200,38 +201,47 @@ get_genome_files <- function(species = "mus_musculus",
 #'   by CellRanger
 #'   \url{https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr}
 #' @param gtf_file String depicting the filename of a GTF file to modify
-#' @param wanted_biotypes An unnamed vector of biotypes to keep. Default uses the full
-#'   
+#' @param wanted_biotypes An unnamed vector of biotypes to keep.
+#'    Default uses the full list of biotypes from CellRanger.
 #' @return A GTFFile object with filtered sequences.
 qc_filter_lines_of_gtf <- function(gtf_file,
                                    wanted_biotypes = c(
                                      "protein_coding", "lincRNA", "antisense",
-                                     "IG_LV_gene", "IG_V_gene", "IG_V_pseudogene",
-                                     "IG_D_gene", "IG_J_gene", "IG_J_pseudogene",
-                                     "IG_C_gene", "IG_C_pseudogene", "TR_V_gene",
-                                     "TR_V_pseudogene", "TR_D_gene", "TR_J_gene",
-                                     "TR_J_pseudogene", "TR_C_gene")) {
+                                     "IG_LV_gene", "IG_V_gene",
+                                     "IG_V_pseudogene", "IG_D_gene",
+                                     "IG_J_gene", "IG_J_pseudogene",
+                                     "IG_C_gene", "IG_C_pseudogene",
+                                     "TR_V_gene", "TR_V_pseudogene",
+                                     "TR_D_gene", "TR_J_gene",
+                                     "TR_J_pseudogene", "TR_C_gene"
+                                   )) {
   message("Importing GTF")
-  tabb <- as.data.frame(import(gtf_file))
+  tabb <- import(gtf_file) ## Do not coerce into data frame
   ## -- Filter with CellRanger attributes
   ## Use these biotypes, as suggested by CellRanger
   keep_features <- tabb$gene_biotype %in% wanted_biotypes
-  
-  message("GTF features before:                ", nrow(tabb))
+
+  message("GTF features before:                ", length(tabb))
   tabb <- tabb[keep_features, ]
-  message("         - after biotype filter:  ", nrow(tabb))
+  message("         - after biotype filter:  ", length(tabb))
   keep_genes <- !(is.na(tabb$gene_name) | is.null(tabb$gene_name))
   tabb <- tabb[keep_genes, ]
-  message("         - after genename filter: ", nrow(tabb))
+  message("         - after genename filter: ", length(tabb))
   return(tabb)
 }
 
 #' @title Append Sequences to GTF file
 #' @description Insert all sequences as single Ensembl "protein_coding" exons
-#' @param gtf_table A GTFFile object.
+#' @param gtffile A GTFFile object (GRanges), explicitly not a data frame.
 #' @param insert_seqs A DNAStringSet object of all sequences.
+#' @param ftype String depicting the feature type to add. Can be gene,
+#'    exon or any other feature type. Default: exon
+#' @param src String depicting source of sequence. Default: ensembl.
+#' @param biotype String depicting the biotype. Default: protein_coding.
 #' @return A modified GTFFile object with appended sequences included.
-add_lines_to_gtf <- function(gtf_table, insert_seqs) {
+add_lines_to_gtf <- function(gtffile, insert_seqs,
+                             ftype = "exon", src = "ensembl",
+                             biotype = "protein_coding") {
 
   new_gtf_entry <- function(dnaseq_entry) {
     nam <- names(dnaseq_entry)
@@ -240,29 +250,24 @@ add_lines_to_gtf <- function(gtf_table, insert_seqs) {
     biotype <- "protein_coding"
     ver <- 1
 
-    return(c(
-      seqnames = nam, start = 1, end = len, width = len, strand = "+",
-      source = src, type = "exon", score = NA, phase = NA,
+    return(GRanges(
+      paste0(nam, ":", 1, "-", len, ":+"),
+      source = src, type = ftype,
       gene_id = nam, gene_version = ver, gene_name = nam,
       gene_source = src, gene_biotype = biotype, transcript_id = nam,
       transcript_version = ver, transcript_name = nam,
-      transcript_source = src, transcript_biotype = biotype, tag = NA,
-      transcript_support_level = NA, exon_number = 1, exon_id = nam,
-      exon_version = ver, ccds_id = NA, protein_id = NA,
-      protein_version = NA
+      transcript_source = src, transcript_biotype = biotype,
+      exon_number = 1, exon_id = nam, exon_version = ver
     ))
   }
-  ## Include new sequence names
-  levels(gtf_table$seqnames) <- c(
-    levels(gtf_table$seqnames),
-    names(insert_seqs)
-  )
   message("Appending Sequences to GTF:")
   for (ind in seq_along(names(insert_seqs))) {
-    message("         - ", names(insert_seqs)[ind])
-    gtf_table <- rbind(gtf_table, new_gtf_entry(insert_seqs[ind]))
+    message("    - ", names(insert_seqs[ind]))
+    suppressWarnings(
+        gtffile <- c(gtffile, new_gtf_entry(insert_seqs[ind]))
+    )
   }
-  return(gtf_table)
+  return(gtffile)
 }
 
 #' @title Add new sequences to both GTF and FASTA files

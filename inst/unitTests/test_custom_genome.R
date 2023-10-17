@@ -1,6 +1,22 @@
+library(testthat)
+## Debug
+## sub4 = file.path("inst/extdata", "subsample4.gtf.gz")
+## sub8 = file.path("inst/extdata", "subsample8.gtf.gz")
+## usfa = file.path("inst/extdata", "user_sequences.fa")
+## tiny = file.path("inst/extdata", "tiny.fa.gz")
+
 sub4 = system.file("extdata", "subsample4.gtf.gz", package="CustomGenome")
 sub8 = system.file("extdata", "subsample8.gtf.gz", package="CustomGenome")
 usfa = system.file("extdata", "user_sequences.fa", package="CustomGenome")
+tiny = system.file("extdata", "tiny.fa.gz", package="CustomGenome")
+
+test_sysfiles <- function() {
+  checkEquals(file.exists(sub4), TRUE)
+  checkEquals(file.exists(sub8), TRUE)
+  checkEquals(file.exists(usfa), TRUE)
+  checkEquals(file.exists(tiny), TRUE)
+}
+
 
 test_get_genome_urls_default <- function() {
   checkEquals(get_genome_urls(),
@@ -67,37 +83,71 @@ test_qc_filter_lines_of_gtf_2 <- function() {
     strsplit(gsub("(\n| )", "",
                   capture_messages(
                     qc_filter_lines_of_gtf(sub4)))[2:4], split=":"),
-    function(x) as.integer(x[[2]]))
+    function(x) as.integer(x[[2]])),
     c(100, 88, 86))
 }
 
 test_add_lines_to_gtf <- function() {
-  obj_gtf = as.data.frame(import(sub8))
-  obj_fas = readDNAStringSet(usfa)
-  add_seqs_to_gtf(obj_gtf, obj_fas)
-  checkEquals(TRUE, FALSE)
+  obj_gtf <- import(sub8)
+  obj_fas <- readDNAStringSet(usfa)
+  zz <- add_lines_to_gtf(obj_gtf, obj_fas)
+  checkEquals(
+    as.character(tail(zz, 3)@seqnames@values),
+    c("One", "Two", "Three")
+  )
+}
+
+## This is purely used to generate test-data
+generate_tiny_genome <- function(genome_file = "/mnt/galaxy_data/genomes/Mus_musculus.GRCm39.dna.primary_assembly.fa.gz",
+                                 n_samp = 10, cont_stretch = 1e4) {
+  gen <- readDNAStringSet(genome_file)
+  gen <- head(gen, 21)
+  for (chrom in names(gen)) {
+    message("Processing ", chrom)
+    max_cap = (length(gen[[chrom]]) - (cont_stretch+10))
+      gen[[chrom]] <- gen[[chrom]][sort(
+          do.call(c, lapply(
+              sample(1:max_cap, n_samp),
+              function(x) {
+                  seq(x, x + cont_stretch - 1)
+              }
+          ))
+      )]
+  }
+  names(gen) <- gsub("^([0-9A-Z]+)\\s+.*", "\\1", names(gen))
+  writeXStringSet(gen, "tiny.fa.gz", compress=TRUE)
+  return(gen)
 }
 
 test_add_seqs_to_gtf_and_fasta <- function() {
-  checkEquals(TRUE, FALSE)
+  gfiles <- list(gtf = sub8, fasta = tiny)
+  res <- add_seqs_to_gtf_and_fasta(gfiles, usfa)
+  checkEquals(
+    as.character(tail(import(res$gtf), 3)@seqnames@values),
+    c("One", "Two", "Three")
+  )
+  checkEquals(
+    tail(names(readDNAStringSet(res$fasta)), 3),
+    c("One", "Two", "Three")
+  )
 }
 
-test_prime_fastq_files <- function() {
-  checkEquals(TRUE, FALSE)
-}
+## test_prime_fastq_files <- function() {
+##   checkEquals(TRUE, FALSE)
+## }
 
-test_retrieve_index <- function() {
-  checkEquals(TRUE, FALSE)
-}
+## test_retrieve_index <- function() {
+##   checkEquals(TRUE, FALSE)
+## }
 
-test_perform_alignment <- function() {
-  checkEquals(TRUE, FALSE)
-}
+## test_perform_alignment <- function() {
+##   checkEquals(TRUE, FALSE)
+## }
 
-test_summarize_alignment <- function() {
-  checkEquals(TRUE, FALSE)
-}
+## test_summarize_alignment <- function() {
+##   checkEquals(TRUE, FALSE)
+## }
 
-test_generate_count_matrix <- function() {
-  checkEquals(TRUE, FALSE)
-}
+## test_generate_count_matrix <- function() {
+##   checkEquals(TRUE, FALSE)
+## }

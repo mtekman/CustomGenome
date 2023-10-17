@@ -1,1 +1,1 @@
-BiocGenerics::testPackage("CustomGenome")
+BiocGenerics:::testPackage("CustomGenome")
