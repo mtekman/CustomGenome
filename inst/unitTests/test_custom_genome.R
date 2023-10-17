@@ -47,26 +47,37 @@ test_get_genome_urls_custom <- function() {
 }
 
 test_get_genome_files <- function() {
-  checkEquals(get_genome_files(
-    fasta_type = "dna_rm.nonchromosomal",
-    gtf_type = "abinitio.gtf", output_folder="/tmp"),
-    list(gtf = "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz",
-         fasta = "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"))
+  capture_messages(res <- get_genome_files(
+      fasta_type = "dna_rm.nonchromosomal",
+      gtf_type = "abinitio.gtf", output_folder = "/tmp"
+  ))
+  checkEquals(res, list(
+      gtf = "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz",
+      fasta = "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
+  ))
 }
 
 ## Dependent on last test running
 test_check_sum_matches1 <- function() {
-  checkEquals(check_sum_matches(
-    paste0("http://ftp.ensembl.org/pub/release-105/gtf/",
-           "mus_musculus/Mus_musculus.GRCm39.105.abinitio.gtf.gz"),
-    "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz"), TRUE)
+  capture_messages(res <- check_sum_matches(
+      paste0(
+          "http://ftp.ensembl.org/pub/release-105/gtf/",
+          "mus_musculus/Mus_musculus.GRCm39.105.abinitio.gtf.gz"
+      ),
+      "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz"
+      ))
+  checkEquals(res, TRUE)
 }
 
 test_check_sum_matches2 <- function() {
-  checkEquals(check_sum_matches(
-    paste0("http://ftp.ensembl.org/pub/release-105/fasta/",
-           "mus_musculus/dna/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"),
-    "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"), TRUE)
+  capture_messages(res <- check_sum_matches(
+      paste0(
+          "http://ftp.ensembl.org/pub/release-105/fasta/",
+          "mus_musculus/dna/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
+      ),
+      "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
+      ))
+  checkEquals(res, TRUE)
 }
 
 test_qc_filter_lines_of_gtf_1 <- function() {
@@ -90,9 +101,9 @@ test_qc_filter_lines_of_gtf_2 <- function() {
 test_add_lines_to_gtf <- function() {
   obj_gtf <- import(sub8)
   obj_fas <- readDNAStringSet(usfa)
-  zz <- add_lines_to_gtf(obj_gtf, obj_fas)
+  capture_messages(res <- add_lines_to_gtf(obj_gtf, obj_fas))
   checkEquals(
-    as.character(tail(zz, 3)@seqnames@values),
+    as.character(tail(res, 3)@seqnames@values),
     c("One", "Two", "Three")
   )
 }
@@ -104,7 +115,7 @@ generate_tiny_genome <- function(genome_file = "/mnt/galaxy_data/genomes/Mus_mus
   gen <- head(gen, 21)
   for (chrom in names(gen)) {
     message("Processing ", chrom)
-    max_cap = (length(gen[[chrom]]) - (cont_stretch+10))
+    max_cap = (length(gen[[chrom]]) - (cont_stretch + 10))
       gen[[chrom]] <- gen[[chrom]][sort(
           do.call(c, lapply(
               sample(1:max_cap, n_samp),
@@ -121,7 +132,7 @@ generate_tiny_genome <- function(genome_file = "/mnt/galaxy_data/genomes/Mus_mus
 
 test_add_seqs_to_gtf_and_fasta <- function() {
   gfiles <- list(gtf = sub8, fasta = tiny)
-  res <- add_seqs_to_gtf_and_fasta(gfiles, usfa)
+  capture_messages(res <- add_seqs_to_gtf_and_fasta(gfiles, usfa))
   checkEquals(
     as.character(tail(import(res$gtf), 3)@seqnames@values),
     c("One", "Two", "Three")
@@ -132,9 +143,9 @@ test_add_seqs_to_gtf_and_fasta <- function() {
   )
 }
 
-## test_prime_fastq_files <- function() {
-##   checkEquals(TRUE, FALSE)
-## }
+test_prime_fastq_files <- function() {
+  prime_fastq_files(system.file("extdata"), "e4.gtf.gz", "e8.gtf.gz")
+}
 
 ## test_retrieve_index <- function() {
 ##   checkEquals(TRUE, FALSE)
