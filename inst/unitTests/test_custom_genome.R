@@ -141,11 +141,48 @@ test_add_seqs_to_gtf_and_fasta <- function() {
     tail(names(readDNAStringSet(res$fasta)), 3),
     c("One", "Two", "Three")
   )
+  file.remove(unlist(res)) ## remove to not interfere with other tests
 }
 
-test_prime_fastq_files <- function() {
-  prime_fastq_files(system.file("extdata"), "e4.gtf.gz", "e8.gtf.gz")
+test_prime_fastq_files1 <- function() {
+  ## Paired
+  checkEquals(
+      prime_fastq_files(
+          system.file("extdata", package = "CustomGenome"),
+          "e4.gtf.gz", "e8.gtf.gz", "e-align.bam"
+      ),
+      list(reads1 = sub4, reads2 = sub8, align_base = "subsample-align.bam")
+  )
+  ## Single
+  checkEquals(
+    prime_fastq_files(
+      system.file("extdata", package = "CustomGenome"), ".gtf.gz", NULL, ".bam"
+    ),
+    list(reads1 = c(sub4, sub8), reads2 = NULL,
+         align_base = sub(".gtf.gz", ".bam", basename(c(sub4, sub8))))
+  )
 }
+
+test_prime_fastq_files3 <- function() {
+  tdir <- tempdir()
+  fnames <- file.path(tdir, c(
+      "sample1_r1.fa.gz", "sample1_r2.fa.gz", "sample1_r3.fa.gz",
+      "s2_r1.fa.gz", "s2_r2.fa.gz", "s2_i3.fa.gz",
+      "reads_r1.fa.gz", "reads_r2.fa.gz"
+  ))
+  file.create(fnames)
+
+  checkEquals(
+      prime_fastq_files(tdir, "_r1.fa.gz", "_r2.fa.gz", "-align.bam"),
+      list(
+          reads1 = file.path(tdir, c("reads_r1.fa.gz", "s2_r1.fa.gz", "sample1_r1.fa.gz")),
+          reads2 = file.path(tdir, c("reads_r2.fa.gz", "s2_r2.fa.gz", "sample1_r2.fa.gz")),
+          align_base = c("reads-align.bam", "s2-align.bam", "sample1-align.bam")
+      )
+  )
+  file.remove(fnames)
+}
+
 
 ## test_retrieve_index <- function() {
 ##   checkEquals(TRUE, FALSE)
