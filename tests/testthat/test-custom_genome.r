@@ -4,10 +4,10 @@
 ## usfa = file.path("inst/extdata", "user_sequences.fa")
 ## tiny = file.path("inst/extdata", "tiny.fa.gz")
 
-sub4 = system.file("extdata", "subsample4.gtf.gz", package="CustomGenome")
-sub8 = system.file("extdata", "subsample8.gtf.gz", package="CustomGenome")
-usfa = system.file("extdata", "user_sequences.fa", package="CustomGenome")
-tiny = system.file("extdata", "tiny.fa.gz", package="CustomGenome")
+sub4 <- system.file("extdata", "subsample4.gtf.gz", package="CustomGenome")
+sub8 <- system.file("extdata", "subsample8.gtf.gz", package="CustomGenome")
+usfa <- system.file("extdata", "user_sequences.fa", package="CustomGenome")
+tiny <- system.file("extdata", "tiny.fa.gz", package="CustomGenome")
 
 test_that("sysfiles", {
   expect_equal(file.exists(sub4), TRUE)
@@ -17,7 +17,7 @@ test_that("sysfiles", {
 })
 
 
-test_that("get_genome_urls_defaul", {
+test_that("get_genome_urls_default", {
   expect_equal(get_genome_urls(),
                list(gtf = paste0("http://ftp.ensembl.org/pub/release-105/gtf/",
                                  "mus_musculus/Mus_musculus.GRCm39.105.gtf.gz"),
@@ -26,7 +26,7 @@ test_that("get_genome_urls_defaul", {
                                    "dna.primary_assembly.fa.gz")))
 })
 
-test_that("get_genome_urls_danrer_release10", {
+test_that("get_genome_urls_danrer_release104", {
   expect_equal(get_genome_urls(species="danio_rerio", release="104"),
                list(gtf = paste0("http://ftp.ensembl.org/pub/release-104/gtf/",
                                  "danio_rerio/Danio_rerio.GRCz11.104.gtf.gz"),
@@ -35,7 +35,7 @@ test_that("get_genome_urls_danrer_release10", {
                                    "dna.primary_assembly.fa.gz")))
 })
 
-test_that("get_genome_urls_custo", {
+test_that("get_genome_urls_custom", {
   expect_equal(get_genome_urls(release="80", build="EquCab2", species="equus_caballus",
                                fasta_type="dna.toplevel"),
                list(gtf = paste0("http://ftp.ensembl.org/pub/release-80/gtf/",
@@ -45,7 +45,7 @@ test_that("get_genome_urls_custo", {
                                    "dna.toplevel.fa.gz")))
 })
 
-test_that("get_genome_file", {
+test_that("get_genome_files", {
   capture_messages(res <- get_genome_files(
                      fasta_type = "dna_rm.nonchromosomal",
                      gtf_type = "abinitio.gtf", output_folder = "/tmp"
@@ -79,7 +79,7 @@ test_that("check_sum_matches", {
   expect_equal(res, TRUE)
 })
 
-test_that("qc_filter_lines_of_gtf_", {
+test_that("qc_filter_lines_of_gtf_1", {
   expect_equal(sapply(
     strsplit(gsub("(\n| )", "",
                   capture_messages(
@@ -88,7 +88,7 @@ test_that("qc_filter_lines_of_gtf_", {
     c(100, 80, 78))
 })
 
-test_that("qc_filter_lines_of_gtf_", {
+test_that("qc_filter_lines_of_gtf_2", {
   expect_equal(sapply(
     strsplit(gsub("(\n| )", "",
                   capture_messages(
@@ -97,7 +97,7 @@ test_that("qc_filter_lines_of_gtf_", {
     c(100, 88, 86))
 })
 
-test_that("add_lines_to_gt", {
+test_that("add_lines_to_gtf", {
   obj_gtf <- import(sub8)
   obj_fas <- readDNAStringSet(usfa)
   capture_messages(res <- add_lines_to_gtf(obj_gtf, obj_fas))
@@ -108,7 +108,7 @@ test_that("add_lines_to_gt", {
 })
 
 ## This is purely used to generate test-data
-generate_tiny_genome <- function(genome_file = "/mnt/galaxy_data/genomes/Mus_musculus.GRCm39.dna.primary_assembly.fa.gz",
+generate_tiny_genome <- function(genome_file,
                                  n_samp = 10, cont_stretch = 1e4) {
   gen <- readDNAStringSet(genome_file)
   gen <- head(gen, 21)
@@ -129,7 +129,7 @@ generate_tiny_genome <- function(genome_file = "/mnt/galaxy_data/genomes/Mus_mus
   return(gen)
 }
 
-test_that("add_seqs_to_gtf_and_fast", {
+test_that("add_seqs_to_gtf_and_fasta", {
   gfiles <- list(gtf = sub8, fasta = tiny)
   capture_messages(res <- add_seqs_to_gtf_and_fasta(gfiles, usfa))
   expect_equal(
@@ -143,7 +143,7 @@ test_that("add_seqs_to_gtf_and_fast", {
   file.remove(unlist(res)) ## remove to not interfere with other tests
 })
 
-test_that("prime_fastq_files", {
+test_that("prime_fastq_files_1", {
   ## Paired
   expect_equal(
     prime_fastq_files(
@@ -164,7 +164,7 @@ test_that("prime_fastq_files", {
   expect_equal(mes, "We assume that these are single-end reads\n")
 })
 
-test_that("prime_fastq_files", {
+test_that("prime_fastq_files_2", {
   tdir <- tempdir()
   fnames <- file.path(tdir,
                       c("sample1_r1.fa.gz", "sample1_r2.fa.gz", "sample1_r3.fa.gz",
@@ -183,7 +183,7 @@ test_that("prime_fastq_files", {
   file.remove(fnames)
 })
 
-test_that("retrieve_inde", {
+test_that("retrieve_index", {
   index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(tiny)), "-subread-index")
   if (dir.exists(index_dir)) {
     unlink(index_dir, recursive = TRUE)
@@ -199,6 +199,11 @@ test_that("retrieve_inde", {
   mes <- capture_messages(res <- retrieve_index(tiny))
   expect_equal(res, index_dir)
   expect_equal(mes, paste0("Index already built: ", index_dir, "\n"))
+
+  ## Remove directory
+  if (dir.exists(index_dir)) {
+    unlink(index_dir, recursive = TRUE)
+  }
 })
 
 ## test_that("perform_alignment", {

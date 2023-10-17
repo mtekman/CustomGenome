@@ -28,6 +28,11 @@
 #' @return A list of two components. The first component \code{gtf} contains the
 #'   URL of the GTF file on server. The second component \code{fasta} contains
 #'   the URL of the FASTA primary assembly genome on server.
+#' @examples
+#' get_genome_urls(
+#'     species = "mus_musculus",
+#'     release = "104"
+#' )
 get_genome_urls <- function(species = "mus_musculus",
                             build = NULL, release = NULL,
                             fasta_type = "dna.primary_assembly",
@@ -86,6 +91,12 @@ get_genome_urls <- function(species = "mus_musculus",
 #' @param url URL to remote genome file (.fa.gz or .gtf.gz)
 #' @param outfile Local file where there genome file exists.
 #' @return logical. If the file is consistent with that on the remote server.
+#' @examples
+#' get_genome_files(fasta_type = "dna_rm.nonchromosomal",
+#'                  gtf_type = "abinitio.gtf", output_folder = "/tmp")
+#' check_sum_matches(paste0("http://ftp.ensembl.org/pub/release-105/gtf/",
+#'                          "mus_musculus/Mus_musculus.GRCm39.105.abinitio.gtf.gz"),
+#'                     "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz")
 check_sum_matches <- function(url, outfile) {
   parse_check_sum <- function(str) {
     res_split <- unlist(strsplit(str, split = "\\s+"))
@@ -147,12 +158,12 @@ check_sum_matches <- function(url, outfile) {
 #'   location of the GTF file on disk. The second component \code{fasta}
 #'   contains the location of the FASTA primary assembly genome on disk.
 #' @examples
-#' \donttest{
 #' mus_musc = get_genome_files(
 #'     species = "mus_musculus",
-#'     output_folder = "/genomes/"
+#'     output_folder = "/tmp",
+#'     fasta_type = "dna_rm.nonchromosomal",
+#'     gtf_type = "abinitio.gtf"
 #' )
-#' }
 #' @export
 get_genome_files <- function(species = "mus_musculus",
                              output_folder = "genomes",
@@ -204,6 +215,9 @@ get_genome_files <- function(species = "mus_musculus",
 #' @param wanted_biotypes An unnamed vector of biotypes to keep.
 #'    Default uses the full list of biotypes from CellRanger.
 #' @return A GTFFile object with filtered sequences.
+#' @examples
+#' sub8 <- system.file("extdata", "subsample8.gtf.gz", package="CustomGenome")
+#' new_gtf <- qc_filter_lines_of_gtf(sub8)
 qc_filter_lines_of_gtf <- function(gtf_file,
                                    wanted_biotypes = c(
                                      "protein_coding", "lincRNA", "antisense",
@@ -239,10 +253,17 @@ qc_filter_lines_of_gtf <- function(gtf_file,
 #' @param src String depicting source of sequence. Default: ensembl.
 #' @param biotype String depicting the biotype. Default: protein_coding.
 #' @return A modified GTFFile object with appended sequences included.
+#' @examples
+#' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
+#' user_sequences <- system.file("extdata", "user_sequences.fa", package="CustomGenome")
+#' library(rtracklayer)
+#' library(Biostrings)
+#' obj_gtf <- import(sub8)
+#' obj_fas <- readDNAStringSet(user_sequences)
+#' tail(add_lines_to_gtf(obj_gtf, obj_fas))
 add_lines_to_gtf <- function(gtffile, insert_seqs,
                              ftype = "exon", src = "ensembl",
                              biotype = "protein_coding") {
-
   new_gtf_entry <- function(dnaseq_entry) {
     nam <- names(dnaseq_entry)
     len <- width(dnaseq_entry)
@@ -264,7 +285,7 @@ add_lines_to_gtf <- function(gtffile, insert_seqs,
   for (ind in seq_along(names(insert_seqs))) {
     message("    - ", names(insert_seqs[ind]))
     suppressWarnings(
-        gtffile <- c(gtffile, new_gtf_entry(insert_seqs[ind]))
+      gtffile <- c(gtffile, new_gtf_entry(insert_seqs[ind]))
     )
   }
   return(gtffile)
@@ -285,13 +306,11 @@ add_lines_to_gtf <- function(gtffile, insert_seqs,
 #'   \code{fasta} contains the location of the new annotated FASTA primary
 #'   assembly genome on disk.
 #' @examples
-#' \donttest{
-#' mus_musc = get_genome_files(
-#'     species = "mus_musculus",
-#'     output_folder = "/genomes/"
-#' )
-#' new_genome_files = add_seqs_to_gtf_and_fasta(mus_musc, "~/mynewseqs.fasta")
-#' }
+#' myfasta <- system.file("extdata", "tiny.fa.gz", package = "CustomGenome")
+#' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
+#' user_sequences <- system.file("extdata", "user_sequences.fa", package="CustomGenome")
+#' gfiles <- list(gtf = sub8, fasta = myfasta)
+#' new_genome_files <- add_seqs_to_gtf_and_fasta(gfiles, user_sequences)
 #' @export
 add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
   message("Inserting Sequences")
@@ -352,18 +371,10 @@ add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
 #'   filepaths, reads2 contains a vector of R2 read filepaths, and align_base
 #'   contains the basename of the BAM files (no path).
 #' @examples
-#' \donttest{
-#' dir_lists = list(
-#'     index = index.dir,
-#'     fastq = "1_fastqs",
-#'     align = "2_bams",
-#'     count = "3_counts"
+#' prime_fastq_files(
+#'       system.file("extdata", package = "CustomGenome"),
+#'       "e4.gtf.gz", "e8.gtf.gz", "e-align.bam"
 #' )
-#' read_lists = prime_fastq_files(
-#'     dir_lists$fastq, "_1.fq.gz", "_2.fq.gz",
-#'     "-align.bam"
-#' )
-#' }
 #' @export
 prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
                               align_end = "align.bam") {
@@ -404,15 +415,8 @@ prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
 #' @param genome_fasta String depicting the filepath of the genome FASTA file.
 #' @return String depicting the filepath of the Subread index.
 #' @examples
-#' \donttest{
-#' source("custom_genome.R")
-#' new_genome_files = add_seqs_to_gtf_and_fasta(homo_sap, "GFP.fasta")
-#' index_dir = retrieve_index(new_genome_files$fasta)
-#' dir_lists = list(
-#'     index = index_dir, fastq = "1_fastqs", align = "2_bams",
-#'     count = "3_counts"
-#' )
-#' }
+#' tiny <- system.file("extdata", "tiny.fa.gz", package="CustomGenome")
+#' retrieve_index(tiny)
 #' @export
 retrieve_index <- function(genome_fasta) {
   index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(genome_fasta)),
