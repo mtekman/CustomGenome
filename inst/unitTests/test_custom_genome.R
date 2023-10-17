@@ -154,13 +154,15 @@ test_prime_fastq_files1 <- function() {
       list(reads1 = sub4, reads2 = sub8, align_base = "subsample-align.bam")
   )
   ## Single
-  checkEquals(
-    prime_fastq_files(
+  mes <- capture_messages(res <- prime_fastq_files(
       system.file("extdata", package = "CustomGenome"), ".gtf.gz", NULL, ".bam"
-    ),
+  ))
+  checkEquals(
+    res,
     list(reads1 = c(sub4, sub8), reads2 = NULL,
          align_base = sub(".gtf.gz", ".bam", basename(c(sub4, sub8))))
   )
+  checkEquals(mes, "We assume that these are single-end reads\n")
 }
 
 test_prime_fastq_files3 <- function() {
@@ -183,10 +185,23 @@ test_prime_fastq_files3 <- function() {
   file.remove(fnames)
 }
 
+test_retrieve_index <- function() {
+  index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(tiny)), "-subread-index")
+  if (dir.exists(index_dir)) {
+    unlink(index_dir, recursive = TRUE)
+  }
+  mes <- capture_messages(capture_output(zz <- retrieve_index(tiny)))
+  checkEquals(
+      readLines(file.path(index_dir, "reference_index.reads"), n = 5)[[5]],
+      "512020\t13"
+  )
+  checkEquals(substr(mes, 1, 14), "Building Index")
 
-## test_retrieve_index <- function() {
-##   checkEquals(TRUE, FALSE)
-## }
+  ## Run again, this time with retrieval only
+  mes <- capture_messages(res <- retrieve_index(tiny))
+  checkEquals(res, index_dir)
+  checkEquals(mes, paste0("Index already built: ", index_dir, "\n"))
+}
 
 ## test_perform_alignment <- function() {
 ##   checkEquals(TRUE, FALSE)
