@@ -413,14 +413,19 @@ prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
 #' @description Build a Subread index at the directory location of your genome
 #'   FASTA file, or if it already exists, retrieve it.
 #' @param genome_fasta String depicting the filepath of the genome FASTA file.
+#' @param index_dir String depicting the filepath of where the index directory
+#'   will be built. If \code{NULL}, then it will be in the same location as
+#'   the genome_fasta with "-subread-index" appended.
 #' @return String depicting the filepath of the Subread index.
 #' @examples
 #' tiny <- system.file("extdata", "tiny.fa.gz", package="CustomGenome")
 #' retrieve_index(tiny)
 #' @export
-retrieve_index <- function(genome_fasta) {
-  index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(genome_fasta)),
-                      "-subread-index")
+retrieve_index <- function(genome_fasta, index_dir=NULL) {
+  if (is.null(index_dir)){
+    index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(genome_fasta)),
+                        "-subread-index")
+  }
   if (dir.exists(index_dir)) {
     message("Index already built: ", index_dir)
   } else {
@@ -456,7 +461,7 @@ perform_alignment <- function(dir_lists, read_lists,
                               type = "rna", nthreads = 30) {
 
   stopifnot(c("index", "align") %in% names(dir_lists))
-  stopifnot(c("reads1", "reads2", "align_base") %in% names(dir_lists))
+  stopifnot(c("reads1", "reads2", "align_base") %in% names(read_lists))
 
   dir.create(dir_lists$index, recursive = TRUE, showWarnings = FALSE)
   dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
@@ -519,10 +524,10 @@ summarize_alignment <- function(dir_align, read_align) {
   stat_summ_file <- file.path(dir_align, "stats_summary.tsv")
   write.table(tab, stat_summ_file, sep = "\t", quote = FALSE)
   message("Wrote: ", stat_summ_file)
-  return(t(as.data.frame(tab[c(
-    "Total_fragments", "Mapped_fragments",
-    "Percentage_Mapped"
-  ), ])))
+  tab_out <- as.data.frame(t(tab))[c(
+    "Total_fragments", "Mapped_fragments", "Percentage_Mapped"
+  )]
+  return(tab_out)
 }
 
 #' @title Generate Count Matrix from Aligned BAM files

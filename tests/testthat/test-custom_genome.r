@@ -8,6 +8,9 @@ sub4 <- system.file("extdata", "subsample4.gtf.gz", package="CustomGenome")
 sub8 <- system.file("extdata", "subsample8.gtf.gz", package="CustomGenome")
 usfa <- system.file("extdata", "user_sequences.fa", package="CustomGenome")
 tiny <- system.file("extdata", "tiny.fa.gz", package="CustomGenome")
+r1_fastq <- system.file("extdata", "r1.fq.gz", package="CustomGenome")
+r2_fastq <- system.file("extdata", "r2.fq.gz", package="CustomGenome")
+
 
 test_that("sysfiles", {
   expect_equal(file.exists(sub4), TRUE)
@@ -183,36 +186,66 @@ test_that("prime_fastq_files_2", {
   file.remove(fnames)
 })
 
-test_that("retrieve_index", {
-  index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(tiny)), "-subread-index")
-  if (dir.exists(index_dir)) {
-    unlink(index_dir, recursive = TRUE)
+test_that("all_subread_commands", {
+  test_dir <- tempdir() 
+  
+  read_lists <- list(reads1=c(r1_fastq), reads2=c(r2_fastq),
+                    align_base= "test.bam")
+  
+  dir_lists <- list(index = paste0(test_dir, "-subread-index"),
+                    align = paste0(test_dir, "-aligned"))
+
+  if (dir.exists(dir_lists$index)) {
+      unlink(dir_lists$index, recursive = TRUE)
   }
-  mes <- capture_messages(capture_output(zz <- retrieve_index(tiny)))
+
+  ## Build Index
+  mes <- capture_messages(capture_output(zz <- retrieve_index(tiny, dir_lists$index)))
+  ## Check Index
   expect_equal(
-    readLines(file.path(index_dir, "reference_index.reads"), n = 5)[[5]],
+    readLines(file.path(dir_lists$index, "reference_index.reads"), n = 5)[[5]],
     "512020\t13"
   )
   expect_equal(substr(mes, 1, 14), "Building Index")
 
   ## Run again, this time with retrieval only
-  mes <- capture_messages(res <- retrieve_index(tiny))
-  expect_equal(res, index_dir)
-  expect_equal(mes, paste0("Index already built: ", index_dir, "\n"))
+  mes <- capture_messages(res <- retrieve_index(tiny, dir_lists$index))
+  expect_equal(res, dir_lists$index)
+  expect_equal(mes, paste0("Index already built: ", dir_lists$index, "\n"))  
 
-  ## Remove directory
-  if (dir.exists(index_dir)) {
-    unlink(index_dir, recursive = TRUE)
+  ## Perform Alignment
+  mes <- capture_output(res <- perform_alignment(dir_lists, read_lists,
+                                                 nthreads=1))
+  ## Check Alignment
+  expect_equal(res["Mapped_fragments",], 1)
+  expect_equal(gsub("\\s\\s+", "", unlist(strsplit(mes, split="\n"))[62]),
+               "||Not properly paired : 1||")
+
+  ## Check Alignment File
+  library(Rsamtools)  ## for scanBAM
+  bamfile <- file.path(dir_lists$align, read_lists$align_base)
+  expect_equal(
+    as.character(scanBam(bamfile)[[1]]$seq[[1]][1:10]),
+    "ATATTAGTTG")
+
+  ## Check summary
+  mes <- capture_messages(res <- summarize_alignment(dir_lists$align, read_lists$align_base))
+  expect_equal(file.exists(file.path(dir_lists$align, "stats_summary.tsv")),
+               TRUE)
+  expect_equal(res$Percentage_Mapped, 100)
+
+  ## Do quantification
+  ##TODO
+  
+  ## Clean up
+  if (dir.exists(dir_lists$index)) {
+      unlink(dir_lists$index, recursive = TRUE)
   }
+  if (dir.exists(dir_lists$align)) {
+      unlink(dir_lists$index, recursive = TRUE)
+  }  
 })
 
-## test_that("perform_alignment", {
-##   expect_equal(TRUE, FALSE)
-## }
-
-## test_that("summarize_alignment", {
-##   expect_equal(TRUE, FALSE)
-## }
 
 ## test_that("generate_count_matrix", {
 ##   expect_equal(TRUE, FALSE)
