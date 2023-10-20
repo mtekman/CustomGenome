@@ -35,7 +35,7 @@ micromamba install -c bioconda -c conda-forge bioconductor-customgenome
 
 ```r
 library(remotes)
-remotes::install_gitlab("mtekman/CustomGenome",
+remotes::install_github("mtekman/CustomGenome",
                         repos = BiocManager::repositories())
 ```
 
