@@ -8,6 +8,7 @@ sub4 <- system.file("extdata", "subsample4.gtf.gz", package="CustomGenome")
 sub8 <- system.file("extdata", "subsample8.gtf.gz", package="CustomGenome")
 usfa <- system.file("extdata", "user_sequences.fa", package="CustomGenome")
 tiny <- system.file("extdata", "tiny.fa.gz", package="CustomGenome")
+tiny_gtf <- system.file("extdata", "tiny.gtf.gz", package="CustomGenome")
 r1_fastq <- system.file("extdata", "r1.fq.gz", package="CustomGenome")
 r2_fastq <- system.file("extdata", "r2.fq.gz", package="CustomGenome")
 
@@ -161,8 +162,8 @@ test_that("prime_fastq_files_1", {
                           ))
   expect_equal(
     res,
-    list(reads1 = c(sub4, sub8), reads2 = NULL,
-         align_base = sub(".gtf.gz", ".bam", basename(c(sub4, sub8))))
+    list(reads1 = c(sub4, sub8, tiny_gtf), reads2 = NULL,
+         align_base = sub(".gtf.gz", ".bam", basename(c(sub4, sub8, tiny_gtf))))
   )
   expect_equal(mes, "We assume that these are single-end reads\n")
 })
@@ -187,16 +188,20 @@ test_that("prime_fastq_files_2", {
 })
 
 test_that("all_subread_commands", {
+  require(Rsamtools)
   test_dir <- tempdir() 
   
   read_lists <- list(reads1=c(r1_fastq), reads2=c(r2_fastq),
-                    align_base= "test.bam")
+                     align_base= "test.bam")
   
-  dir_lists <- list(index = paste0(test_dir, "-subread-index"),
-                    align = paste0(test_dir, "-aligned"))
+  dir_lists <- list(
+    index = paste0(test_dir, "-subread-index"),
+    align = paste0(test_dir, "-aligned"),
+    count = paste0(test_dir, "-counts")
+  )
 
   if (dir.exists(dir_lists$index)) {
-      unlink(dir_lists$index, recursive = TRUE)
+    unlink(dir_lists$index, recursive = TRUE)
   }
 
   ## Build Index
@@ -222,31 +227,36 @@ test_that("all_subread_commands", {
                "||Not properly paired : 1||")
 
   ## Check Alignment File
-  library(Rsamtools)  ## for scanBAM
   bamfile <- file.path(dir_lists$align, read_lists$align_base)
   expect_equal(
     as.character(scanBam(bamfile)[[1]]$seq[[1]][1:10]),
     "ATATTAGTTG")
 
   ## Check summary
-  mes <- capture_messages(res <- summarize_alignment(dir_lists$align, read_lists$align_base))
-  expect_equal(file.exists(file.path(dir_lists$align, "stats_summary.tsv")),
-               TRUE)
+  mes <- capture_messages(res <- summarize_alignment(
+                            dir_lists$align,
+                            read_lists$align_base
+                          ))
+  expect_equal(
+    file.exists(file.path(dir_lists$align, "stats_summary.tsv")),
+    TRUE
+  )
   expect_equal(res$Percentage_Mapped, 100)
 
   ## Do quantification
-  ##TODO
+  cfiles <- generate_count_matrix(dir_lists,
+                                  gtf_file = tiny_gtf, bam_pattern = "*test.bam$",
+                                  GTF.attrType = "gene_id", nthreads = 30
+                                  )
+  ## Test quantification
+  expect_equal(readLines(cfiles$stat)[2], "Assigned\t1")
+  expect_equal(readLines(tmp$count)[3], "large_hit\t1")
   
   ## Clean up
   if (dir.exists(dir_lists$index)) {
-      unlink(dir_lists$index, recursive = TRUE)
+    unlink(dir_lists$index, recursive = TRUE)
   }
   if (dir.exists(dir_lists$align)) {
-      unlink(dir_lists$index, recursive = TRUE)
+    unlink(dir_lists$index, recursive = TRUE)
   }  
 })
-
-
-## test_that("generate_count_matrix", {
-##   expect_equal(TRUE, FALSE)
-## }
