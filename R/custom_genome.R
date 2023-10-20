@@ -454,9 +454,6 @@ retrieve_index <- function(genome_fasta, index_dir = NULL) {
 #'   30.
 #' @return Void function. Output files are created at the location of the
 #'   `dir_lists$align'.
-#' @examples
-#' read_lists = prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
-#' perform_alignment(dir_lists, read_lists)
 #' @export
 perform_alignment <- function(dir_lists, read_lists,
                               type = "rna", nthreads = 30) {
@@ -486,16 +483,6 @@ perform_alignment <- function(dir_lists, read_lists,
 #'   files.
 #' @return A data frame depicting the total fragments and the mapped fragments,
 #'   along with the percentage mapped.
-#' @examples
-#' dir_lists = list(
-#'     index = index_dir,
-#'     fastq = "1_fastqs",
-#'     align = "2_bams",
-#'     count = "3_counts"
-#' )
-#' perform_alignment(dir_lists, read_lists)
-#' read_lists = prime_fastq_files(dir_lists$fastq, "_1.fq.gz", "_2.fq.gz")
-#' summarize_alignment(dir_lists$align, read_lists$align)
 #' @export
 summarize_alignment <- function(dir_align, read_align) {
   bam_summary <- paste0(file.path(dir_align, read_align), ".summary")
@@ -572,14 +559,6 @@ validate_align_arguments <- function(...) {
 #' @return A list of two components: `count' for the location of the count
 #'   matrix file, and `stat' for the location of the statistics file. Output
 #'   matrices and statistics are placed in the `dir_lists$count' directory.
-#' @examples
-#' dir_lists = list(index=index_dir, fastq="1_fastqs",
-#'                  align="2_bams", count="3_counts")
-#' read_lists = prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
-#' perform_alignment(dir_lists, read_lists)
-#' do_feature_counts(dir_lists, new_genome_files$gtf,
-#'     featuretype = "exon",
-#'     isPairedEnd = !is.null(read_lists$reads2))
 #' @export
 generate_count_matrix <- function(dir_lists, gtf_file,
                                   bam_pattern = "*align.bam$", ...) {
