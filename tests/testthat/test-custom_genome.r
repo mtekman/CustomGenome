@@ -22,31 +22,34 @@ test_that("sysfiles", {
 
 
 test_that("get_genome_urls_default", {
-  expect_equal(get_genome_urls(),
-               list(gtf = paste0("http://ftp.ensembl.org/pub/release-105/gtf/",
-                                 "mus_musculus/Mus_musculus.GRCm39.105.gtf.gz"),
-                    fasta = paste0("http://ftp.ensembl.org/pub/release-105/fasta/",
-                                   "mus_musculus/dna/Mus_musculus.GRCm39.",
-                                   "dna.primary_assembly.fa.gz")))
+  expect_equal(
+    get_genome_urls(),
+    list(gtf = paste0("http://ftp.ensembl.org/pub/release-105/gtf/",
+                      "mus_musculus/Mus_musculus.GRCm39.105.gtf.gz"),
+         fasta = paste0("http://ftp.ensembl.org/pub/release-105/fasta/",
+                        "mus_musculus/dna/Mus_musculus.GRCm39.",
+                        "dna.primary_assembly.fa.gz")))
 })
 
 test_that("get_genome_urls_danrer_release104", {
-  expect_equal(get_genome_urls(species="danio_rerio", release="104"),
-               list(gtf = paste0("http://ftp.ensembl.org/pub/release-104/gtf/",
-                                 "danio_rerio/Danio_rerio.GRCz11.104.gtf.gz"),
-                    fasta = paste0("http://ftp.ensembl.org/pub/release-104/fasta/",
-                                   "danio_rerio/dna/Danio_rerio.GRCz11.",
-                                   "dna.primary_assembly.fa.gz")))
+  expect_equal(
+    get_genome_urls(species="danio_rerio", release="104"),
+    list(gtf = paste0("http://ftp.ensembl.org/pub/release-104/gtf/",
+                      "danio_rerio/Danio_rerio.GRCz11.104.gtf.gz"),
+         fasta = paste0("http://ftp.ensembl.org/pub/release-104/fasta/",
+                        "danio_rerio/dna/Danio_rerio.GRCz11.",
+                        "dna.primary_assembly.fa.gz")))
 })
 
 test_that("get_genome_urls_custom", {
-  expect_equal(get_genome_urls(release="80", build="EquCab2", species="equus_caballus",
-                               fasta_type="dna.toplevel"),
-               list(gtf = paste0("http://ftp.ensembl.org/pub/release-80/gtf/",
-                                 "equus_caballus/Equus_caballus.EquCab2.80.gtf.gz"),
-                    fasta = paste0("http://ftp.ensembl.org/pub/release-80/fasta/",
-                                   "equus_caballus/dna/Equus_caballus.EquCab2.",
-                                   "dna.toplevel.fa.gz")))
+  expect_equal(
+    get_genome_urls(release="80", build="EquCab2", species="equus_caballus",
+                    fasta_type="dna.toplevel"),
+    list(gtf = paste0("http://ftp.ensembl.org/pub/release-80/gtf/",
+                      "equus_caballus/Equus_caballus.EquCab2.80.gtf.gz"),
+         fasta = paste0("http://ftp.ensembl.org/pub/release-80/fasta/",
+                        "equus_caballus/dna/Equus_caballus.EquCab2.",
+                        "dna.toplevel.fa.gz")))
 })
 
 test_that("get_genome_files", {
@@ -54,10 +57,11 @@ test_that("get_genome_files", {
                      fasta_type = "dna_rm.nonchromosomal",
                      gtf_type = "abinitio.gtf", output_folder = "/tmp"
                    ))
-  expect_equal(res, list(
-                      gtf = "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz",
-                      fasta = "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
-                    ))
+  expect_equal(res,
+               list(
+                 gtf = "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz",
+                 fasta = "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
+               ))
 })
 
 ## Dependent on last test running
@@ -73,13 +77,14 @@ test_that("check_sum_matches", {
 })
 
 test_that("check_sum_matches", {
-  capture_messages(res <- check_sum_matches(
-                     paste0(
-                       "http://ftp.ensembl.org/pub/release-105/fasta/",
-                       "mus_musculus/dna/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
-                     ),
-                     "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
-                   ))
+  capture_messages(
+    res <- check_sum_matches(
+      paste0(
+        "http://ftp.ensembl.org/pub/release-105/fasta/",
+        "mus_musculus/dna/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
+      ),
+      "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
+    ))
   expect_equal(res, TRUE)
 })
 
@@ -88,8 +93,7 @@ test_that("qc_filter_lines_of_gtf_1", {
     strsplit(gsub("(\n| )", "",
                   capture_messages(
                     qc_filter_lines_of_gtf(sub8)))[2:4], split=":"),
-    function(x) as.integer(x[[2]])),
-    c(100, 80, 78))
+    function(x) as.integer(x[[2]])), c(100, 80, 78))
 })
 
 test_that("qc_filter_lines_of_gtf_2", {
@@ -97,8 +101,7 @@ test_that("qc_filter_lines_of_gtf_2", {
     strsplit(gsub("(\n| )", "",
                   capture_messages(
                     qc_filter_lines_of_gtf(sub4)))[2:4], split=":"),
-    function(x) as.integer(x[[2]])),
-    c(100, 88, 86))
+    function(x) as.integer(x[[2]])), c(100, 88, 86))
 })
 
 test_that("add_lines_to_gtf", {
@@ -124,12 +127,10 @@ generate_tiny_genome <- function(genome_file,
                                       sample(1:max_cap, n_samp),
                                       function(x) {
                                         seq(x, x + cont_stretch - 1)
-                                      }
-                                    ))
-                       )]
+                                      })))]
   }
   names(gen) <- gsub("^([0-9A-Z]+)\\s+.*", "\\1", names(gen))
-  writeXStringSet(gen, "tiny.fa.gz", compress=TRUE)
+  writeXStringSet(gen, "tiny.fa.gz", compress = TRUE)
   return(gen)
 }
 
@@ -158,8 +159,9 @@ test_that("prime_fastq_files_1", {
   )
   ## Single
   mes <- capture_messages(res <- prime_fastq_files(
-                            system.file("extdata", package = "CustomGenome"), ".gtf.gz", NULL, ".bam"
-                          ))
+                            system.file("extdata",
+                                        package = "CustomGenome"), ".gtf.gz",
+                            NULL, ".bam"))
   expect_equal(
     res,
     list(reads1 = c(sub4, sub8, tiny_gtf), reads2 = NULL,
@@ -171,16 +173,19 @@ test_that("prime_fastq_files_1", {
 test_that("prime_fastq_files_2", {
   tdir <- tempdir()
   fnames <- file.path(tdir,
-                      c("sample1_r1.fa.gz", "sample1_r2.fa.gz", "sample1_r3.fa.gz",
+                      c("sample1_r1.fa.gz", "sample1_r2.fa.gz",
+                        "sample1_r3.fa.gz",
                         "s2_r1.fa.gz", "s2_r2.fa.gz", "s2_i3.fa.gz",
                         "reads_r1.fa.gz", "reads_r2.fa.gz"))
   file.create(fnames)
-  
+
   expect_equal(
     prime_fastq_files(tdir, "_r1.fa.gz", "_r2.fa.gz", "-align.bam"),
     list(
-      reads1 = file.path(tdir, c("reads_r1.fa.gz", "s2_r1.fa.gz", "sample1_r1.fa.gz")),
-      reads2 = file.path(tdir, c("reads_r2.fa.gz", "s2_r2.fa.gz", "sample1_r2.fa.gz")),
+      reads1 = file.path(tdir, c("reads_r1.fa.gz", "s2_r1.fa.gz",
+                                 "sample1_r1.fa.gz")),
+      reads2 = file.path(tdir, c("reads_r2.fa.gz", "s2_r2.fa.gz",
+                                 "sample1_r2.fa.gz")),
       align_base = c("reads-align.bam", "s2-align.bam", "sample1-align.bam")
     )
   )
@@ -189,11 +194,11 @@ test_that("prime_fastq_files_2", {
 
 test_that("all_subread_commands", {
   require(Rsamtools)
-  test_dir <- tempdir() 
-  
-  read_lists <- list(reads1=c(r1_fastq), reads2=c(r2_fastq),
-                     align_base= "test.bam")
-  
+  test_dir <- tempdir()
+
+  read_lists <- list(reads1 = c(r1_fastq), reads2 = c(r2_fastq),
+                     align_base = "test.bam")
+
   dir_lists <- list(
     index = paste0(test_dir, "-subread-index"),
     align = paste0(test_dir, "-aligned"),
@@ -205,7 +210,8 @@ test_that("all_subread_commands", {
   }
 
   ## Build Index
-  mes <- capture_messages(capture_output(zz <- retrieve_index(tiny, dir_lists$index)))
+  mes <- capture_messages(capture_output(
+    zz <- retrieve_index(tiny, dir_lists$index)))
   ## Check Index
   expect_equal(
     readLines(file.path(dir_lists$index, "reference_index.reads"), n = 5)[[5]],
@@ -216,14 +222,14 @@ test_that("all_subread_commands", {
   ## Run again, this time with retrieval only
   mes <- capture_messages(res <- retrieve_index(tiny, dir_lists$index))
   expect_equal(res, dir_lists$index)
-  expect_equal(mes, paste0("Index already built: ", dir_lists$index, "\n"))  
+  expect_equal(mes, paste0("Index already built: ", dir_lists$index, "\n"))
 
   ## Perform Alignment
   mes <- capture_output(res <- perform_alignment(dir_lists, read_lists,
-                                                 nthreads=1))
+                                                 nthreads = 1))
   ## Check Alignment
-  expect_equal(res["Mapped_fragments",], 1)
-  expect_equal(gsub("\\s\\s+", "", unlist(strsplit(mes, split="\n"))[62]),
+  expect_equal(res["Mapped_fragments", ], 1)
+  expect_equal(gsub("\\s\\s+", "", unlist(strsplit(mes, split = "\n"))[62]),
                "||Not properly paired : 1||")
 
   ## Check Alignment File
@@ -235,8 +241,7 @@ test_that("all_subread_commands", {
   ## Check summary
   mes <- capture_messages(res <- summarize_alignment(
                             dir_lists$align,
-                            read_lists$align_base
-                          ))
+                            read_lists$align_base))
   expect_equal(
     file.exists(file.path(dir_lists$align, "stats_summary.tsv")),
     TRUE
@@ -245,18 +250,18 @@ test_that("all_subread_commands", {
 
   ## Do quantification
   cfiles <- generate_count_matrix(dir_lists,
-                                  gtf_file = tiny_gtf, bam_pattern = "*test.bam$",
-                                  GTF.attrType = "gene_id", nthreads = 30
-                                  )
+                                  gtf_file = tiny_gtf,
+                                  bam_pattern = "*test.bam$",
+                                  GTF.attrType = "gene_id", nthreads = 30)
   ## Test quantification
   expect_equal(readLines(cfiles$stat)[2], "Assigned\t1")
-  expect_equal(readLines(tmp$count)[3], "large_hit\t1")
-  
+  expect_equal(readLines(cfiles$count)[3], "large_hit\t1")
+
   ## Clean up
   if (dir.exists(dir_lists$index)) {
     unlink(dir_lists$index, recursive = TRUE)
   }
   if (dir.exists(dir_lists$align)) {
     unlink(dir_lists$index, recursive = TRUE)
-  }  
+  }
 })

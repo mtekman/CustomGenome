@@ -587,7 +587,6 @@ generate_count_matrix <- function(dir_lists, gtf_file,
   message("Counting ", ellips$GTF.featureType, " threads=", ellips$nthreads)
   fc <- do.call(featureCounts, ellips)
 
-  
   count_table <- fc$counts
   count_stat <- fc$stat
   count_table <- count_table[order(rownames(count_table)), ]
