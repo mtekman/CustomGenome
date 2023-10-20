@@ -29,7 +29,7 @@
 #'   URL of the GTF file on server. The second component \code{fasta} contains
 #'   the URL of the FASTA primary assembly genome on server.
 #' @examples
-#' CustomeGenome:::get_genome_urls(
+#' CustomGenome:::get_genome_urls(
 #'     species = "mus_musculus",
 #'     release = "104"
 #' )
@@ -218,7 +218,7 @@ get_genome_files <- function(species = "mus_musculus",
 #' @return A GTFFile object with filtered sequences.
 #' @examples
 #' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
-#' new_gtf <- qc_filter_lines_of_gtf(sub8)
+#' new_gtf <- CustomGenome:::qc_filter_lines_of_gtf(sub8)
 qc_filter_lines_of_gtf <- function(gtf_file,
                                    wanted_biotypes = c(
                                      "protein_coding", "lincRNA", "antisense",
@@ -310,7 +310,8 @@ add_lines_to_gtf <- function(gtffile, insert_seqs,
 #' @examples
 #' myfasta <- system.file("extdata", "tiny.fa.gz", package = "CustomGenome")
 #' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
-#' user_sequences <- system.file("extdata", "user_sequences.fa", package="CustomGenome")
+#' user_sequences <- system.file("extdata", "user_sequences.fa",
+#'                               package="CustomGenome")
 #' gfiles <- list(gtf = sub8, fasta = myfasta)
 #' new_genome_files <- add_seqs_to_gtf_and_fasta(gfiles, user_sequences)
 #' @export
@@ -538,15 +539,20 @@ validate_align_arguments <- function(...) {
   ## Set default args for featurecounts
   ellips <- list(...)
   ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
-                                ellips$GTF.attrType)
+                                ellips$GTF.attrType
+                                )
   ellips$GTF.featureType <- ifelse(is.null(ellips$GTF.featureType), "exon",
-                                   ellips$GTF.featureType)
+                                   ellips$GTF.featureType
+                                   )
   ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
-                               ellips$isPairedEnd)
+                               ellips$isPairedEnd
+                               )
   ellips$nthreads <- ifelse(is.null(ellips$nthreads), 30,
-                            ellips$nthreads)
+                            ellips$nthreads
+                            )
   ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
-                              ellips$juncCounts)
+                              ellips$juncCounts
+                              )
   return(ellips)
 }
 
