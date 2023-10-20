@@ -421,23 +421,27 @@ prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
 #'   the genome_fasta with "-subread-index" appended.
 #' @return String depicting the filepath of the Subread index.
 #' @examples
-#' tiny <- system.file("extdata", "tiny.fa.gz", package="CustomGenome")
+#' tiny <- system.file("extdata", "tiny.fa.gz", package = "CustomGenome")
 #' retrieve_index(tiny)
 #' @export
 retrieve_index <- function(genome_fasta, index_dir = NULL) {
-  if (is.null(index_dir)) {
-    index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(genome_fasta)),
-                        "-subread-index")
-  }
-  if (dir.exists(index_dir)) {
-    message("Index already built: ", index_dir)
-  } else {
-    dir.create(index_dir)
-    message("Building Index at: ", index_dir)
-    buildindex(basename = file.path(index_dir, "reference_index"),
-               reference = genome_fasta)
-  }
-  return(index_dir)
+    if (is.null(index_dir)) {
+        index_dir <- paste0(
+            file_path_sans_ext(file_path_sans_ext(genome_fasta)),
+            "-subread-index"
+        )
+    }
+    if (dir.exists(index_dir)) {
+        message("Index already built: ", index_dir)
+    } else {
+        dir.create(index_dir)
+        message("Building Index at: ", index_dir)
+        buildindex(
+            basename = file.path(index_dir, "reference_index"),
+            reference = genome_fasta
+        )
+    }
+    return(index_dir)
 }
 
 #' @title Perform alignment of FASTQ files against Reference via Subread
@@ -456,9 +460,13 @@ retrieve_index <- function(genome_fasta, index_dir = NULL) {
 #'   `dir_lists$align'.
 #' @examples
 #' test_dir <- tempdir()
+#' tiny <- system.file("extdata", "tiny.fa.gz", package = "CustomGenome")
 #' r1_fastq <- system.file("extdata", "r1.fq.gz", package = "CustomGenome")
 #' r2_fastq <- system.file("extdata", "r2.fq.gz", package = "CustomGenome")
-#' read_lists <- list(reads1 = c(r1_fastq), reads2 = c(r2_fastq))
+#' read_lists <- list(
+#'     reads1 = c(r1_fastq), reads2 = c(r2_fastq),
+#'     align_base = c("align.bam")
+#' )
 #' dir_lists <- list(
 #'     index = paste0(test_dir, "-subread-index"),
 #'     align = paste0(test_dir, "-aligned"),
@@ -469,25 +477,25 @@ retrieve_index <- function(genome_fasta, index_dir = NULL) {
 #' @export
 perform_alignment <- function(dir_lists, read_lists,
                               type = "rna", nthreads = 30) {
-    stopifnot(c("index", "align") %in% names(dir_lists))
-    stopifnot(c("reads1", "reads2", "align_base") %in% names(read_lists))
+  stopifnot(c("index", "align") %in% names(dir_lists))
+  stopifnot(c("reads1", "reads2", "align_base") %in% names(read_lists))
 
-    dir.create(dir_lists$index, recursive = TRUE, showWarnings = FALSE)
-    dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
+  dir.create(dir_lists$index, recursive = TRUE, showWarnings = FALSE)
+  dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
 
-    align(
-        index = file.path(dir_lists$index, "reference_index"),
-        readfile1 = read_lists$reads1,
-        readfile2 = read_lists$reads2,
-        type = type, # or 0 for RNA, 1 for DNA or "dna"
-        output_format = "BAM",
-        output_file = file.path(
-            dir_lists$align,
-            read_lists$align_base
-        ),
-        phredOffset = 33,
-        nthreads = nthreads
-    )
+  align(
+    index = file.path(dir_lists$index, "reference_index"),
+    readfile1 = read_lists$reads1,
+    readfile2 = read_lists$reads2,
+    type = type, # or 0 for RNA, 1 for DNA or "dna"
+    output_format = "BAM",
+    output_file = file.path(
+      dir_lists$align,
+      read_lists$align_base
+    ),
+    phredOffset = 33,
+    nthreads = nthreads
+  )
 }
 
 #' @title Summarize Subread alignment statistics
@@ -498,9 +506,6 @@ perform_alignment <- function(dir_lists, read_lists,
 #'   alignment files.
 #' @return A data frame depicting the total fragments and the mapped fragments,
 #'   along with the percentage mapped.
-#' @examples
-#' summarize_alignment(system.file("extdata", package = "CustomGenome"),
-#'                     "test.bam")#' 
 #' @export
 summarize_alignment <- function(dir_align, read_align) {
   bam_summary <- paste0(file.path(dir_align, read_align), ".summary")
