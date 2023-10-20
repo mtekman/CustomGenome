@@ -421,8 +421,8 @@ prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
 #' tiny <- system.file("extdata", "tiny.fa.gz", package="CustomGenome")
 #' retrieve_index(tiny)
 #' @export
-retrieve_index <- function(genome_fasta, index_dir=NULL) {
-  if (is.null(index_dir)){
+retrieve_index <- function(genome_fasta, index_dir = NULL) {
+  if (is.null(index_dir)) {
     index_dir <- paste0(file_path_sans_ext(file_path_sans_ext(genome_fasta)),
                         "-subread-index")
   }
@@ -525,8 +525,8 @@ summarize_alignment <- function(dir_align, read_align) {
   write.table(tab, stat_summ_file, sep = "\t", quote = FALSE)
   message("Wrote: ", stat_summ_file)
   tab_out <- as.data.frame(t(tab))[c(
-    "Total_fragments", "Mapped_fragments", "Percentage_Mapped"
-  )]
+                            "Total_fragments", "Mapped_fragments", "Percentage_Mapped"
+                          )]
   return(tab_out)
 }
 
@@ -538,18 +538,14 @@ summarize_alignment <- function(dir_align, read_align) {
 #'   the count matrix will be placed.
 #' @param gtf_file String depicting the filepath of where the GTF annotation
 #'   file is located.
-#' @param attrtype String depicting the attribute type to use as rownames in the
-#'   final count matrix. All keys in the 9th column of the GTF file are
-#'   possible. Default is "gene_name".
-#' @param featuretype String depicting the feature type to count reads from. All
-#'   values in the 3rd column of the GTF file are possible, such as `CDS',
-#'   `exon', `five_prime_utr', `three_prime_utr', `gene', `transcript',
-#'   etc. Default is "exon".
-#' @param isPairedEnd logical. Whether the reads are paired-end or single-end.
-#' @param nthreads Positive integer. Number of threads to use for
-#'   counting. Default is 30.
-#' @return Void function. Output matrices and statistics are placed in the
-#'   `dir_lists$count' directory.
+#' @param bam_pattern Pattern string depicting a way to match the BAM files in
+#'   the `align' directory.
+#' @param ... An ellipsis argument that is passed in Rsubreads's `align'
+#'   function. Typical values are `featuretype' (default: "exon"), `isPairedEnd'
+#'   (default: TRUE), `nthreads' (default: 30).
+#' @return A list of two components: `count' for the location of the count
+#'   matrix file, and `stat' for the location of the statistics file. Output
+#'   matrices and statistics are placed in the `dir_lists$count' directory.
 #' @examples
 #' \donttest{
 #' dir_lists = list(index=index_dir, fastq="1_fastqs",
@@ -562,25 +558,36 @@ summarize_alignment <- function(dir_align, read_align) {
 #' }
 #' @export
 generate_count_matrix <- function(dir_lists, gtf_file,
-                                  attrtype = "gene_name", featuretype = "exon",
-                                  isPairedEnd = TRUE, nthreads = 30) {
+                                  bam_pattern = "*align.bam$", ...) {
   stopifnot(c("count", "align") %in% names(dir_lists))
+  ## Set default args for featurecounts
+  ellips <- list(...)
+  ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
+                                ellips$GTF.attrType)
+  ellips$GTF.featureType <- ifelse(is.null(ellips$GTF.featureType), "exon",
+                                   ellips$GTF.featureType)
+  ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
+                               ellips$isPairedEnd)
+  ellips$nthreads <- ifelse(is.null(ellips$nthreads), 30,
+                            ellips$nthreads)
+  ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
+                              ellips$juncCounts)
+
   dir.create(dir_lists$count, recursive = TRUE, showWarnings = FALSE)
 
   bamfiles <- paste0(dir_lists$align, "/",
-                     list.files(dir_lists$align, pattern = "*align.bam$"))
+                     list.files(dir_lists$align, pattern = bam_pattern))
   names(bamfiles) <- basename(file_path_sans_ext(file_path_sans_ext(bamfiles)))
 
-  message("Counting ", featuretype, " threads=", nthreads)
-  fc <- featureCounts(files = bamfiles,
-                      nthreads = nthreads,
-                      isPairedEnd = isPairedEnd,
-                      annot.ext = gtf_file,
-                      isGTFAnnotationFile = TRUE,
-                      GTF.featureType = featuretype,
-                      GTF.attrType = attrtype,
-                      juncCounts = TRUE)
+  ## Add required arguments
+  ellips$files = bamfiles
+  ellips$annot.ext = gtf_file
+  ellips$isGTFAnnotationFile = TRUE
 
+  message("Counting ", ellips$GTF.featureType, " threads=", ellips$nthreads)
+  fc <- do.call(featureCounts, ellips)
+
+  
   count_table <- fc$counts
   count_stat <- fc$stat
   count_table <- count_table[order(rownames(count_table)), ]
@@ -590,14 +597,21 @@ generate_count_matrix <- function(dir_lists, gtf_file,
     return(sub("[._+:]align$", "", cln))
   }
 
+  ## In the case of a single BAM file, still give it a name
+  if (is.null(colnames(count_table))) {
+    count_table <- as.data.frame(count_table)
+    colnames(count_table) <- names(bamfiles)
+  }
+  
+  
   colnames(count_table) <- cleaner_sample_names(colnames(count_table))
   colnames(count_stat) <- cleaner_sample_names(colnames(count_stat))
 
-  out_stat <- paste0(file.path(dir_lists$count,  featuretype),
-                     ".", attrtype, ".stats.tsv")
+  out_stat <- paste0(file.path(dir_lists$count,  ellips$GTF.featureType),
+                     ".", ellips$GTF.attrType, ".stats.tsv")
 
-  out_count <- paste0(file.path(dir_lists$count, featuretype),
-                      ".", attrtype, ".matrix.tsv")
+  out_count <- paste0(file.path(dir_lists$count, ellips$GTF.featureType),
+                      ".", ellips$GTF.attrType, ".matrix.tsv")
 
   ## Write Stats
   write.table(count_stat, out_stat, sep = "\t",
@@ -608,4 +622,5 @@ generate_count_matrix <- function(dir_lists, gtf_file,
   write.table(count_table, out_count, sep = "\t",
               quote = FALSE, col.names = NA, row.names = TRUE)
   message("Counts written to: ", out_count)
+  return(list(count = out_count, stat = out_stat))
 }

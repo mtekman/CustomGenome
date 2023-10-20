@@ -428,7 +428,7 @@ makes sense to specify "exon" as our feature of interest.
 ```R
 generate_count_matrix(dir_lists,
                       new_genome_files$gtf,
-                      featuretype = "exon")
+                      GTF.featureType = "exon")
 ```
 
 
