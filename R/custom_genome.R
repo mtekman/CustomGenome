@@ -29,7 +29,7 @@
 #'   URL of the GTF file on server. The second component \code{fasta} contains
 #'   the URL of the FASTA primary assembly genome on server.
 #' @examples
-#' get_genome_urls(
+#' CustomeGenome:::get_genome_urls(
 #'     species = "mus_musculus",
 #'     release = "104"
 #' )
@@ -94,8 +94,9 @@ get_genome_urls <- function(species = "mus_musculus",
 #' @examples
 #' get_genome_files(fasta_type = "dna_rm.nonchromosomal",
 #'                  gtf_type = "abinitio.gtf", output_folder = "/tmp")
-#' check_sum_matches(paste0("http://ftp.ensembl.org/pub/release-105/gtf/",
-#'                          "mus_musculus/Mus_musculus.GRCm39.105.abinitio.gtf.gz"),
+#' CustomGenome:::check_sum_matches(paste0("http://ftp.ensembl.org/",
+#'                          "pub/release-105/gtf/mus_musculus/",
+#'                          "Mus_musculus.GRCm39.105.abinitio.gtf.gz"),
 #'                     "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz")
 check_sum_matches <- function(url, outfile) {
   parse_check_sum <- function(str) {
@@ -216,7 +217,7 @@ get_genome_files <- function(species = "mus_musculus",
 #'    Default uses the full list of biotypes from CellRanger.
 #' @return A GTFFile object with filtered sequences.
 #' @examples
-#' sub8 <- system.file("extdata", "subsample8.gtf.gz", package="CustomGenome")
+#' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
 #' new_gtf <- qc_filter_lines_of_gtf(sub8)
 qc_filter_lines_of_gtf <- function(gtf_file,
                                    wanted_biotypes = c(
@@ -255,12 +256,13 @@ qc_filter_lines_of_gtf <- function(gtf_file,
 #' @return A modified GTFFile object with appended sequences included.
 #' @examples
 #' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
-#' user_sequences <- system.file("extdata", "user_sequences.fa", package="CustomGenome")
+#' user_sequences <- system.file("extdata", "user_sequences.fa",
+#'                               package = "CustomGenome")
 #' library(rtracklayer)
 #' library(Biostrings)
 #' obj_gtf <- import(sub8)
 #' obj_fas <- readDNAStringSet(user_sequences)
-#' tail(add_lines_to_gtf(obj_gtf, obj_fas))
+#' tail(CustomGenome:::add_lines_to_gtf(obj_gtf, obj_fas))
 add_lines_to_gtf <- function(gtffile, insert_seqs,
                              ftype = "exon", src = "ensembl",
                              biotype = "protein_coding") {
@@ -284,7 +286,7 @@ add_lines_to_gtf <- function(gtffile, insert_seqs,
   message("Appending Sequences to GTF:")
   for (ind in seq_along(names(insert_seqs))) {
     message("    - ", names(insert_seqs[ind]))
-    suppressWarnings(
+    suppressWarnings(  ## A merge warning might confuse the user here.
       gtffile <- c(gtffile, new_gtf_entry(insert_seqs[ind]))
     )
   }
@@ -452,10 +454,8 @@ retrieve_index <- function(genome_fasta, index_dir = NULL) {
 #' @return Void function. Output files are created at the location of the
 #'   `dir_lists$align'.
 #' @examples
-#' \donttest{
 #' read_lists = prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
 #' perform_alignment(dir_lists, read_lists)
-#' }
 #' @export
 perform_alignment <- function(dir_lists, read_lists,
                               type = "rna", nthreads = 30) {
@@ -486,17 +486,15 @@ perform_alignment <- function(dir_lists, read_lists,
 #' @return A data frame depicting the total fragments and the mapped fragments,
 #'   along with the percentage mapped.
 #' @examples
-#' \donttest{
 #' dir_lists = list(
 #'     index = index_dir,
-#'     fastq = "1_fastqs_remote_mount",
+#'     fastq = "1_fastqs",
 #'     align = "2_bams",
 #'     count = "3_counts"
 #' )
 #' perform_alignment(dir_lists, read_lists)
 #' read_lists = prime_fastq_files(dir_lists$fastq, "_1.fq.gz", "_2.fq.gz")
 #' summarize_alignment(dir_lists$align, read_lists$align)
-#' }
 #' @export
 summarize_alignment <- function(dir_align, read_align) {
   bam_summary <- paste0(file.path(dir_align, read_align), ".summary")
@@ -524,10 +522,32 @@ summarize_alignment <- function(dir_align, read_align) {
   stat_summ_file <- file.path(dir_align, "stats_summary.tsv")
   write.table(tab, stat_summ_file, sep = "\t", quote = FALSE)
   message("Wrote: ", stat_summ_file)
-  tab_out <- as.data.frame(t(tab))[c(
-                            "Total_fragments", "Mapped_fragments", "Percentage_Mapped"
-                          )]
+  tab_out <- as.data.frame(t(tab))[
+    c("Total_fragments", "Mapped_fragments", "Percentage_Mapped")]
   return(tab_out)
+}
+
+
+#' @title Validate the Align Ellipsis Arguments for RSubread's Align
+#' @description Convert ellipsis arguments into a list and validate their value.
+#' @param ... An ellipsis argument that is passed in Rsubreads's `align'
+#'   function. Typical values are `featuretype' (default: "exon"), `isPairedEnd'
+#'   (default: TRUE), `nthreads' (default: 30).
+#' @return A list containing validated and/or modified ellipsis arguments.
+validate_align_arguments <- function(...) {
+  ## Set default args for featurecounts
+  ellips <- list(...)
+  ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
+                                ellips$GTF.attrType)
+  ellips$GTF.featureType <- ifelse(is.null(ellips$GTF.featureType), "exon",
+                                   ellips$GTF.featureType)
+  ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
+                               ellips$isPairedEnd)
+  ellips$nthreads <- ifelse(is.null(ellips$nthreads), 30,
+                            ellips$nthreads)
+  ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
+                              ellips$juncCounts)
+  return(ellips)
 }
 
 #' @title Generate Count Matrix from Aligned BAM files
@@ -547,7 +567,6 @@ summarize_alignment <- function(dir_align, read_align) {
 #'   matrix file, and `stat' for the location of the statistics file. Output
 #'   matrices and statistics are placed in the `dir_lists$count' directory.
 #' @examples
-#' \donttest{
 #' dir_lists = list(index=index_dir, fastq="1_fastqs",
 #'                  align="2_bams", count="3_counts")
 #' read_lists = prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
@@ -555,34 +574,20 @@ summarize_alignment <- function(dir_align, read_align) {
 #' do_feature_counts(dir_lists, new_genome_files$gtf,
 #'     featuretype = "exon",
 #'     isPairedEnd = !is.null(read_lists$reads2))
-#' }
 #' @export
 generate_count_matrix <- function(dir_lists, gtf_file,
                                   bam_pattern = "*align.bam$", ...) {
   stopifnot(c("count", "align") %in% names(dir_lists))
-  ## Set default args for featurecounts
-  ellips <- list(...)
-  ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
-                                ellips$GTF.attrType)
-  ellips$GTF.featureType <- ifelse(is.null(ellips$GTF.featureType), "exon",
-                                   ellips$GTF.featureType)
-  ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
-                               ellips$isPairedEnd)
-  ellips$nthreads <- ifelse(is.null(ellips$nthreads), 30,
-                            ellips$nthreads)
-  ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
-                              ellips$juncCounts)
-
   dir.create(dir_lists$count, recursive = TRUE, showWarnings = FALSE)
-
   bamfiles <- paste0(dir_lists$align, "/",
                      list.files(dir_lists$align, pattern = bam_pattern))
   names(bamfiles) <- basename(file_path_sans_ext(file_path_sans_ext(bamfiles)))
 
+  ellips <- validate_align_arguments(...)
   ## Add required arguments
-  ellips$files = bamfiles
-  ellips$annot.ext = gtf_file
-  ellips$isGTFAnnotationFile = TRUE
+  ellips$files <- bamfiles
+  ellips$annot.ext <- gtf_file
+  ellips$isGTFAnnotationFile <- TRUE
 
   message("Counting ", ellips$GTF.featureType, " threads=", ellips$nthreads)
   fc <- do.call(featureCounts, ellips)
@@ -601,8 +606,6 @@ generate_count_matrix <- function(dir_lists, gtf_file,
     count_table <- as.data.frame(count_table)
     colnames(count_table) <- names(bamfiles)
   }
-  
-  
   colnames(count_table) <- cleaner_sample_names(colnames(count_table))
   colnames(count_stat) <- cleaner_sample_names(colnames(count_stat))
 
@@ -611,12 +614,10 @@ generate_count_matrix <- function(dir_lists, gtf_file,
 
   out_count <- paste0(file.path(dir_lists$count, ellips$GTF.featureType),
                       ".", ellips$GTF.attrType, ".matrix.tsv")
-
   ## Write Stats
   write.table(count_stat, out_stat, sep = "\t",
               quote = FALSE, col.names = TRUE, row.names = FALSE)
   message("Stats written to: ", out_stat)
-
   ## Write Counts
   write.table(count_table, out_count, sep = "\t",
               quote = FALSE, col.names = NA, row.names = TRUE)

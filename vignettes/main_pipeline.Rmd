@@ -74,7 +74,7 @@ GCTGAAG
 
 You can access this dataset by loading it as an example dataset:
 
-```R
+```{r}
 data("user_sequences")
 ```
 
@@ -104,7 +104,7 @@ In this example, we will download the latest *Homo Sapiens* genome, and store it
 in a local "genomes" folder. Using the `get_genome_files` function.
 
 
-```R
+```{r}
 homo_sap = get_genome_files(species="homo_sapiens",
                            output_folder="genomes")
 homo_sap
@@ -124,11 +124,10 @@ The output is stored in the `homo_sap` variable which returns an
 object with two components denoting the local positions of the GTF and
 FASTA files for that genome.
 
-```R
-## Outputs:
-$gtf   : 'genomes/Homo_sapiens.GRCh38.105.gtf.gz'
-$fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz'
-```
+    ## Outputs:
+    $gtf   : 'genomes/Homo_sapiens.GRCh38.105.gtf.gz'
+    $fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz'
+
 
 ### Other Ensembl Genomes
 
@@ -139,7 +138,7 @@ using the `urls_override` parameter.
 In the code snippet below, we download the latest *Xenopus Tropicalis*
 genome FASTA and GTF annotation file.
 
-```R
+```{r}
 base_url <- "http://ftp.ensembl.org/pub/release-105"
 xen_trop <- get_genome_files(urls_override=list(
   gtf=paste0(base_url,  "/gtf/xenopus_tropicalis/",
@@ -152,11 +151,10 @@ xen_trop
 Once again the `get_genome_files` function outputs a GTF and FASTA
 component which will be used later in the downstream annotation.
 
-```R
-## Outputs:
-$gtf   : 'genomes/Xenopus_tropicalis.Xenopus_tropicalis_v9.1.105.gtf.gz'
-$fasta : 'genomes/Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz'
-```
+    ## Outputs:
+    $gtf   : 'genomes/Xenopus_tropicalis.Xenopus_tropicalis_v9.1.105.gtf.gz'
+    $fasta : 'genomes/Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz'
+
 
 ## Appending New Sequences
 
@@ -172,7 +170,7 @@ takes as input the output from the `get_genome_files` function above,
 along with the filename for the user-sequences.
 
 
-```R
+```{r}
 my_exogenous_sequences <- "user_sequences.fasta"  ## filename to user-FASTA
 new_genome_files <- add_seqs_to_gtf_and_fasta(homo_sap, my_exogenous_sequences)
 new_genome_files
@@ -187,12 +185,15 @@ new_genome_files
     >          - One
     >          - Two
     >          - Three
-    > Saving new GTF file to: genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz
-    > FASTA exists: 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_Two_Three.fa.gz' doing nothing.
+    > Saving new GTF file to: genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three
+    >                         .gtf.gz
+    > FASTA exists: 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_
+    >                Two_Three.fa.gz' doing nothing.
     
 This step takes approximately 5-10 minutes depending on your machine,
 and it utilizes the same GTF biotype filtering stages as the
-[cellranger pipeline](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr).
+[cellranger pipeline](https://support.10xgenomics.com/single-cell-gene\
+-expression/software/pipelines/latest/using/tutorial_mr).
 
 The function also checks for valid genenames, omitting features which
 do not have a `gene_name` attribute.
@@ -200,11 +201,10 @@ do not have a `gene_name` attribute.
 The function `add_seqs_to_gtf_and_fasta` returns the locations of the
 new sequence and annotation files, in the same manner as `get_genome_files`.
 
-```R
-## Outputs:
-$gtf   : 'genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz'
-$fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_Two_Three.fa.gz'
-```
+    ## Outputs:
+    $gtf   : 'genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz'
+    $fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_Two_Three.fa.gz'
+
 
 ## Performing alignment and quantification of this new genomic reference.
 
@@ -223,26 +223,25 @@ need to perform alignment of our sequences. This involves three steps:
 
 These
 
-```R
+```{r}
 index_dir <- retrieve_index(new_genome_files$fasta)
 index_dir
 ```
 
     > Warning message in dir.create(index.dir):
-    > “'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index' already exists”
+    > “'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with
+    >   _GFP_TB-subread-index' already exists”
 
 
-```R
-# Outputs
-'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index'
-```
+    # Outputs
+    'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index'
 
-(This takes about an hour, no way to speed it up or for it to use
-multiple cores.)
+Depending on the size of the genome, this can take about an hour, due
+to their being no real way to speed it up via multiple cores.
 
 ### Priming Input FASTQ
 
- ```R
+```{r}
 dir_lists <- list(index=index_dir,   ## From previous step
                    fastq="1_fastqs_remote_mount",
                    align="2_bams",
@@ -252,38 +251,37 @@ read_lists <- prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
 read_lists
 ```
 
-```R
-# Outputs
-$reads1 : '1_fastqs_remote_mount/Group1_1_R1.fastq.gz'
-          '1_fastqs_remote_mount/Group1_2_R1.fastq.gz'
-          '1_fastqs_remote_mount/Group1_3_R1.fastq.gz'
-          '1_fastqs_remote_mount/Group2_1_R1.fastq.gz'
-          '1_fastqs_remote_mount/Group2_2_R1.fastq.gz'
-          '1_fastqs_remote_mount/Group2_3_R1.fastq.gz'
-          '1_fastqs_remote_mount/Group3_1_R1.fastq.gz'
-          '1_fastqs_remote_mount/Group3_2_R1.fastq.gz'
-          '1_fastqs_remote_mount/Group3_3_R1.fastq.gz'
+    # Outputs
+    $reads1 : '1_fastqs_remote_mount/Group1_1_R1.fastq.gz'
+              '1_fastqs_remote_mount/Group1_2_R1.fastq.gz'
+              '1_fastqs_remote_mount/Group1_3_R1.fastq.gz'
+              '1_fastqs_remote_mount/Group2_1_R1.fastq.gz'
+              '1_fastqs_remote_mount/Group2_2_R1.fastq.gz'
+              '1_fastqs_remote_mount/Group2_3_R1.fastq.gz'
+              '1_fastqs_remote_mount/Group3_1_R1.fastq.gz'
+              '1_fastqs_remote_mount/Group3_2_R1.fastq.gz'
+              '1_fastqs_remote_mount/Group3_3_R1.fastq.gz'
 
-$reads2 : '1_fastqs_remote_mount/Group1_1_R2.fastq.gz'
-          '1_fastqs_remote_mount/Group1_2_R2.fastq.gz'
-          '1_fastqs_remote_mount/Group1_3_R2.fastq.gz'
-          '1_fastqs_remote_mount/Group2_1_R2.fastq.gz'
-          '1_fastqs_remote_mount/Group2_2_R2.fastq.gz'
-          '1_fastqs_remote_mount/Group2_3_R2.fastq.gz'
-          '1_fastqs_remote_mount/Group3_1_R2.fastq.gz'
-          '1_fastqs_remote_mount/Group3_2_R2.fastq.gz'
-          '1_fastqs_remote_mount/Group3_3_R2.fastq.gz'
+    $reads2 : '1_fastqs_remote_mount/Group1_1_R2.fastq.gz'
+              '1_fastqs_remote_mount/Group1_2_R2.fastq.gz'
+              '1_fastqs_remote_mount/Group1_3_R2.fastq.gz'
+              '1_fastqs_remote_mount/Group2_1_R2.fastq.gz'
+              '1_fastqs_remote_mount/Group2_2_R2.fastq.gz'
+              '1_fastqs_remote_mount/Group2_3_R2.fastq.gz'
+              '1_fastqs_remote_mount/Group3_1_R2.fastq.gz'
+              '1_fastqs_remote_mount/Group3_2_R2.fastq.gz'
+              '1_fastqs_remote_mount/Group3_3_R2.fastq.gz'
 
-$align_base : 'Group1_1_align.bam'
-              'Group1_2_align.bam'
-              'Group1_3_align.bam'
-              'Group2_1_align.bam'
-              'Group2_2_align.bam'
-              'Group2_3_align.bam'
-              'Group3_1_align.bam'
-              'Group3_2_align.bam'
-              'Group3_3_align.bam'
-```
+    $align_base : 'Group1_1_align.bam'
+                  'Group1_2_align.bam'
+                  'Group1_3_align.bam'
+                  'Group2_1_align.bam'
+                  'Group2_2_align.bam'
+                  'Group2_3_align.bam'
+                  'Group3_1_align.bam'
+                  'Group3_2_align.bam'
+                  'Group3_3_align.bam'
+
 
 ### Perform Alignment
 
@@ -292,48 +290,48 @@ library. By default this runs on 30 threads, but can be easily
 overriden by the \code{nthreads} parameter. On a modern workhorse
 machine, this takes 10-20 minutes.
 
-```R
+```{r}
 perform_alignment(dir_lists, read_lists)
 ```
             Rsubread 2.14.2
     
-    //================================= setting ==============================\\
-    ||                                                                        ||
-    || Function      : Read alignment (RNA-Seq)                               ||
-    || Input file 1  : Group1_1_R1.fastq.gz                                   ||
-    || Input file 2  : Group1_1_R2.fastq.gz                                   ||
-    || Output file   : Group1_1_R1.fastq.gz-align.bam (BAM)                   ||
-    || Index name    : reference_index                                        ||
-    ||                                                                        ||
-    ||                    ------------------------------------                ||
-    ||                                                                        ||
-    ||                               Threads : 30                             ||
-    ||                          Phred offset : 33                             ||
-    ||               # of extracted subreads : 10                             ||
-    ||                        Min read1 vote : 3                              ||
-    ||                        Min read2 vote : 1                              ||
-    ||                     Max fragment size : 600                            ||
-    ||                                                                        ||
-    ||             Total fragments : 52,643,874                               ||
-    ||                      Mapped : 51,740,759 (98.3%)                       ||
-    ||             Uniquely mapped : 50,119,180                               ||
-    ||               Multi-mapping : 1,621,579                                ||
-    ||                                                                        ||
-    ||                    Unmapped : 903,115                                  ||
-    ||                                                                        ||
-    ||             Properly paired : 39,616,581                               ||
-    ||         Not properly paired : 12,124,178                               ||
-    ||                   Singleton : 2,174,913                                ||
-    ||                    Chimeric : 3,153,831                                ||
-    ||       Unexpected strandness : 193,036                                  ||
-    ||  Unexpected fragment length : 5,837,741                                ||
-    ||       Unexpected read order : 764,657                                  ||
-    ||                                                                        ||
-    ||                      Indels : 201,441                                  ||
-    ||                                                                        ||
-    ||                Running time : 4.4 minutes                              ||
-    ||                                                                        ||
-    \\========================================================================//
+    //================================= setting ==========================\\
+    ||                                                                    ||
+    || Function      : Read alignment (RNA-Seq)                           ||
+    || Input file 1  : Group1_1_R1.fastq.gz                               ||
+    || Input file 2  : Group1_1_R2.fastq.gz                               ||
+    || Output file   : Group1_1_R1.fastq.gz-align.bam (BAM)               ||
+    || Index name    : reference_index                                    ||
+    ||                                                                    ||
+    ||                    ------------------------------------            ||
+    ||                                                                    ||
+    ||                               Threads : 30                         ||
+    ||                          Phred offset : 33                         ||
+    ||               # of extracted subreads : 10                         ||
+    ||                        Min read1 vote : 3                          ||
+    ||                        Min read2 vote : 1                          ||
+    ||                     Max fragment size : 600                        ||
+    ||                                                                    ||
+    ||             Total fragments : 52,643,874                           ||
+    ||                      Mapped : 51,740,759 (98.3%)                   ||
+    ||             Uniquely mapped : 50,119,180                           ||
+    ||               Multi-mapping : 1,621,579                            ||
+    ||                                                                    ||
+    ||                    Unmapped : 903,115                              ||
+    ||                                                                    ||
+    ||             Properly paired : 39,616,581                           ||
+    ||         Not properly paired : 12,124,178                           ||
+    ||                   Singleton : 2,174,913                            ||
+    ||                    Chimeric : 3,153,831                            ||
+    ||       Unexpected strandness : 193,036                              ||
+    ||  Unexpected fragment length : 5,837,741                            ||
+    ||       Unexpected read order : 764,657                              ||
+    ||                                                                    ||
+    ||                      Indels : 201,441                              ||
+    ||                                                                    ||
+    ||                Running time : 4.4 minutes                          ||
+    ||                                                                    ||
+    \\====================================================================//
     
 
 |                                     | Group1_1 | Group1_2 | Group1_3 |
@@ -382,7 +380,7 @@ perform_alignment(dir_lists, read_lists)
 |                **Inversed_mapping** |758767   | 794051   | 764657   |
 |                          **Indels** |196881   | 207353   | 201441   |
 
-```R
+```{r}
 summarize_alignment(dir_lists$align, read_lists$align)
 ```
 
@@ -425,7 +423,7 @@ cat genomes/Homo_sapiens.GRCh38.105_with_GFP_TB.gtf \
 Our annotated sequences will appear only as exons in a new gene, so it
 makes sense to specify "exon" as our feature of interest.
 
-```R
+```{r}
 generate_count_matrix(dir_lists,
                       new_genome_files$gtf,
                       GTF.featureType = "exon")
@@ -481,8 +479,9 @@ generate_count_matrix(dir_lists,
 
 # Session info
 
-```R
+```{r}
 sessionInfo()
+
 ```
 
     R version 4.3.1 (2023-06-16)
