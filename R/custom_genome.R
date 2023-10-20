@@ -454,35 +454,53 @@ retrieve_index <- function(genome_fasta, index_dir = NULL) {
 #'   30.
 #' @return Void function. Output files are created at the location of the
 #'   `dir_lists$align'.
+#' @examples
+#' test_dir <- tempdir()
+#' r1_fastq <- system.file("extdata", "r1.fq.gz", package = "CustomGenome")
+#' r2_fastq <- system.file("extdata", "r2.fq.gz", package = "CustomGenome")
+#' read_lists <- list(reads1 = c(r1_fastq), reads2 = c(r2_fastq))
+#' dir_lists <- list(
+#'     index = paste0(test_dir, "-subread-index"),
+#'     align = paste0(test_dir, "-aligned"),
+#'     count = paste0(test_dir, "-counts")
+#' )
+#' retrieve_index(tiny, dir_lists$index)
+#' perform_alignment(dir_lists, read_lists, nthreads = 1)
 #' @export
 perform_alignment <- function(dir_lists, read_lists,
                               type = "rna", nthreads = 30) {
+    stopifnot(c("index", "align") %in% names(dir_lists))
+    stopifnot(c("reads1", "reads2", "align_base") %in% names(read_lists))
 
-  stopifnot(c("index", "align") %in% names(dir_lists))
-  stopifnot(c("reads1", "reads2", "align_base") %in% names(read_lists))
+    dir.create(dir_lists$index, recursive = TRUE, showWarnings = FALSE)
+    dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
 
-  dir.create(dir_lists$index, recursive = TRUE, showWarnings = FALSE)
-  dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
-
-  align(index = file.path(dir_lists$index, "reference_index"),
+    align(
+        index = file.path(dir_lists$index, "reference_index"),
         readfile1 = read_lists$reads1,
         readfile2 = read_lists$reads2,
         type = type, # or 0 for RNA, 1 for DNA or "dna"
         output_format = "BAM",
-        output_file = file.path(dir_lists$align,
-                                read_lists$align_base),
+        output_file = file.path(
+            dir_lists$align,
+            read_lists$align_base
+        ),
         phredOffset = 33,
-        nthreads = nthreads)
+        nthreads = nthreads
+    )
 }
 
 #' @title Summarize Subread alignment statistics
 #' @description Collate all individual BAM statistics into a single table, and
 #'   write the summaries to file.
 #' @param dir_align String depicting the alignment directory
-#' @param read_align A vector of strings depicting the names of the alignment
-#'   files.
+#' @param read_align A vector of strings depicting the base names of the
+#'   alignment files.
 #' @return A data frame depicting the total fragments and the mapped fragments,
 #'   along with the percentage mapped.
+#' @examples
+#' summarize_alignment(system.file("extdata", package = "CustomGenome"),
+#'                     "test.bam")#' 
 #' @export
 summarize_alignment <- function(dir_align, read_align) {
   bam_summary <- paste0(file.path(dir_align, read_align), ".summary")
@@ -523,24 +541,24 @@ summarize_alignment <- function(dir_align, read_align) {
 #'   (default: TRUE), `nthreads' (default: 30).
 #' @return A list containing validated and/or modified ellipsis arguments.
 validate_align_arguments <- function(...) {
-  ## Set default args for featurecounts
-  ellips <- list(...)
-  ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
-                                ellips$GTF.attrType
-                                )
-  ellips$GTF.featureType <- ifelse(is.null(ellips$GTF.featureType), "exon",
-                                   ellips$GTF.featureType
-                                   )
-  ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
-                               ellips$isPairedEnd
-                               )
-  ellips$nthreads <- ifelse(is.null(ellips$nthreads), 30,
-                            ellips$nthreads
-                            )
-  ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
-                              ellips$juncCounts
-                              )
-  return(ellips)
+    ## Set default args for featurecounts
+    ellips <- list(...)
+    ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
+        ellips$GTF.attrType
+    )
+    ellips$GTF.featureType <- ifelse(is.null(ellips$GTF.featureType), "exon",
+        ellips$GTF.featureType
+    )
+    ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
+        ellips$isPairedEnd
+    )
+    ellips$nthreads <- ifelse(is.null(ellips$nthreads), 30,
+        ellips$nthreads
+    )
+    ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
+        ellips$juncCounts
+    )
+    return(ellips)
 }
 
 #' @title Generate Count Matrix from Aligned BAM files
@@ -559,6 +577,11 @@ validate_align_arguments <- function(...) {
 #' @return A list of two components: `count' for the location of the count
 #'   matrix file, and `stat' for the location of the statistics file. Output
 #'   matrices and statistics are placed in the `dir_lists$count' directory.
+#' @examples
+#' dir_lists <- list(align = system.file("extdata", package="CustomGenome"),
+#'                   count = tempdir())
+#' gtf_file <- system.file("extdata", "tiny.gtf.gz", package="CustomGenome")
+#' generate_count_matrix(dir_lists, gtf_file, bam_pattern="*test.bam$")
 #' @export
 generate_count_matrix <- function(dir_lists, gtf_file,
                                   bam_pattern = "*align.bam$", ...) {
