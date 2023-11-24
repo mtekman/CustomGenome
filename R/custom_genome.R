@@ -475,9 +475,10 @@ validate_align_arguments <- function(...) {
 #'   Subread
 #' @description Align FASTQ reads into BAM files via Subreads' `align'
 #'   function.
-#' @param dir_lists A list of directories, with two mandatory
+#' @param dir_lists A list of directories, with three mandatory
 #'   components: `index', containing the location of the subread
-#'   index; and `align', the output directory of the BAM alignments.
+#'   index; `align', the output directory of the BAM alignments; and
+#'   `stats', directory for stats and logging files.
 #' @param read_lists A list of vectors, with three mandatory
 #'   components: `reads1`, unnamed vector of FASTQ R1 reads; `reads2',
 #'   unnamed vector of FASTQ R2 reads; `align_base', unnamed vector of
@@ -507,10 +508,11 @@ validate_align_arguments <- function(...) {
 #' perform_alignment(dir_lists, read_lists, nthreads = 1)
 #' @export
 perform_alignment <- function(dir_lists, read_lists, nthreads = 8, ...) {
-  stopifnot(c("index", "align") %in% names(dir_lists))
+  stopifnot(c("index", "align", "stats") %in% names(dir_lists))
   stopifnot(c("reads1", "reads2", "align_base") %in% names(read_lists))
 
   dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
+  dir.create(dir_lists$stats, recursive = TRUE, showWarnings = FALSE)
 
   ellips <- validate_align_arguments(...)
   ## Add required arguments
@@ -529,16 +531,19 @@ perform_alignment <- function(dir_lists, read_lists, nthreads = 8, ...) {
 }
 
 #' @title Summarize Subread alignment statistics
-#' @description Collate all individual BAM statistics into a single table, and
-#'   write the summaries to file.
-#' @param dir_align String depicting the alignment directory
-#' @param read_align A vector of strings depicting the base names of the
-#'   alignment files.
-#' @return A data frame depicting the total fragments and the mapped fragments,
-#'   along with the percentage mapped.
+#' @description Collate all individual BAM statistics into a single
+#'   table, and write the summaries to file.
+#' @param dir_lists A list of directories, with two mandatory
+#'   components: `align', containing the location of the BAM
+#'   alignments; and `stats' indicating where to store the statistics.
+#' @param read_align A vector of strings depicting the base names of
+#'   the alignment files.
+#' @return A data frame depicting the total fragments and the mapped
+#'   fragments, along with the percentage mapped.
 #' @export
-summarize_alignment <- function(dir_align, read_align) {
-  bam_summary <- paste0(file.path(dir_align, read_align), ".summary")
+summarize_alignment <- function(dir_lists, read_align) {
+  stopifnot(c("align", "stats") %in% names(dir_lists))
+  bam_summary <- paste0(file.path(dir_lists$align, read_align), ".summary")
 
   if (!(all(file.exists(bam_summary)))) {
     message(bam_summary)
@@ -560,7 +565,7 @@ summarize_alignment <- function(dir_align, read_align) {
     file_path_sans_ext(read_align)
   )
 
-  stat_summ_file <- file.path(dir_align, "stats_summary.tsv")
+  stat_summ_file <- file.path(dir_lists$stats, "align.stats.tsv")
   write.table(tab, stat_summ_file, sep = "\t", quote = FALSE)
   message("Wrote: ", stat_summ_file)
   tab_out <- as.data.frame(t(tab))[
@@ -599,10 +604,11 @@ validate_fc_arguments <- function(...) {
 #' @title Generate Count Matrix from Aligned BAM files
 #' @description Perform feature counts on aligned data and produce a
 #'   count matrix and matrix statistics.
-#' @param dir_lists A list of two mandatory components: `align'
+#' @param dir_lists A list of three mandatory components: `align'
 #'   containing the directory of the alignment files, `count'
 #'   containing the directory of where the count matrix will be
-#'   placed.
+#'   placed, `stats' containing the directory of where the stats
+#'   tables will be placed.
 #' @param gtf_file String depicting the filepath of where the GTF
 #'   annotation file is located.
 #' @param bam_pattern Pattern string depicting a way to match the BAM
@@ -625,7 +631,7 @@ validate_fc_arguments <- function(...) {
 generate_count_matrix <- function(dir_lists, gtf_file,
                                   bam_pattern = "*.bam$",
                                   nthreads = 8, ...) {
-  stopifnot(c("count", "align") %in% names(dir_lists))
+  stopifnot(c("count", "align", "stats") %in% names(dir_lists))
   dir.create(dir_lists$count, recursive = TRUE, showWarnings = FALSE)
 
   found_bams <- list.files(dir_lists$align, pattern = bam_pattern)
@@ -666,7 +672,7 @@ generate_count_matrix <- function(dir_lists, gtf_file,
   colnames(count_table) <- cleaner_sample_names(colnames(count_table))
   colnames(count_stat) <- cleaner_sample_names(colnames(count_stat))
 
-  out_stat <- paste0(file.path(dir_lists$count,  ellips$GTF.featureType),
+  out_stat <- paste0(file.path(dir_lists$stats,  ellips$GTF.featureType),
                      ".", ellips$GTF.attrType, ".stats.tsv")
 
   out_count <- paste0(file.path(dir_lists$count, ellips$GTF.featureType),

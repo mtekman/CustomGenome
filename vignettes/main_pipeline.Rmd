@@ -245,9 +245,10 @@ overcome any speed issues due to paging.
 
 ```R
 dir_lists <- list(index=index_dir,   ## From previous step
-                   fastq="1_fastqs_remote_mount",
-                   align="2_bams",
-                   count="3_counts")
+                  fastq="1_fastqs",
+                  align="2_bams",
+                  count="3_counts",
+                  stats="stats")
 
 read_lists <- prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
 read_lists
