@@ -524,10 +524,14 @@ perform_alignment <- function(dir_lists, read_lists, nthreads = 8, ...) {
       dir_lists$align,
       read_lists$align_base
   )
-  message("Alignment :", "threads=", ellips$nthreads)
-  do_align <- do.call(align, ellips)
-
-  message("Alignment: finished")
+  message("Alignment : threads=", ellips$nthreads)
+  out_log <- file.path(dir_lists$stats, "align.log")
+  std_out <- capture.output(
+    do_align <- do.call(align, ellips),
+    file = out_log,
+    split = TRUE
+  )
+  message("Alignment : finished")
 }
 
 #' @title Summarize Subread alignment statistics
@@ -652,8 +656,14 @@ generate_count_matrix <- function(dir_lists, gtf_file,
   ellips$isGTFAnnotationFile <- TRUE
   ellips$nthreads <- nthreads
 
-  message("Counting ", ellips$GTF.featureType, " threads=", ellips$nthreads)
-  fc <- do.call(featureCounts, ellips)
+  message("Counting : ", ellips$GTF.featureType, " threads=", ellips$nthreads)
+  out_log <- file.path(dir_lists$stats, "count.log")
+  std_out <- capture.output(
+    fc <- do.call(featureCounts, ellips),
+    file = out_log,
+    split = TRUE
+  )
+  message("Counting : finished")
 
   count_table <- fc$counts
   count_stat <- fc$stat
