@@ -237,7 +237,9 @@ index_dir
     'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index'
 
 Depending on the size of the genome, this can take about an hour, due
-to their being no real way to speed it up via multiple cores.
+to their being no real way to speed it up via multiple cores. One can
+pass in a `memory' parameter (e.g `memory=100000` for 100 GB RAM) to
+overcome any speed issues due to paging.
 
 ### Priming Input FASTQ
 
