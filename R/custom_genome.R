@@ -190,6 +190,8 @@ get_genome_files <- function(species = "mus_musculus",
     message("GTF file: ", outfile$gtf, "\n          exists already")
   } else {
     message("Downloading: ", basename(outfile$gtf))
+    message(urls$gtf)
+    message(outfile$gtf)
     download.file(urls$gtf, outfile$gtf, method = "wget")
   }
   if (!(check_sums && check_sum_matches(urls$gtf, outfile$gtf))) {
@@ -200,6 +202,8 @@ get_genome_files <- function(species = "mus_musculus",
     message("FASTA file: ", outfile$gtf, "\n            exists already")
   } else {
     message("Downloading: ", basename(outfile$fasta))
+    message(urls$fasta)
+    message(outfile$fasta)
     download.file(urls$fasta, outfile$fasta, method = "wget")
   }
   if (!(check_sums && check_sum_matches(urls$fasta, outfile$fasta))) {
