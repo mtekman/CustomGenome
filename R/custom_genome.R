@@ -449,22 +449,46 @@ retrieve_index <- function(genome_fasta, index_dir = NULL, ...) {
   return(file.path(index_dir, "reference_index"))
 }
 
+
+#' @title Validate the align Ellipsis Arguments for RSubread's align function
+#' @description Convert ellipsis arguments into a list and validate their value.
+#' @param ... An ellipsis argument that is passed in Rsubreads's `align'
+#'   function. Typical values are `featuretype' (default: "exon"), `isPairedEnd'
+#'   (default: TRUE), `nthreads' (default: 30).
+#' @return A list containing validated and/or modified ellipsis arguments.
+validate_align_arguments <- function(...) {
+  ## Set default args for featurecounts
+  ellips <- list(...)
+  ellips$type <- ifelse(is.null(ellips$type),
+      "rna", ellips$type
+  )
+  ellips$phredOffset <- ifelse(is.null(ellips$phredOffset),
+      33, ellips$phredOffset
+  )
+  ellips$output_format <- ifelse(is.null(ellips$output_format),
+      "BAM", ellips$output_format
+  )
+  return(ellips)
 }
 
-#' @title Perform alignment of FASTQ files against Reference via Subread
-#' @description Align FASTQ reads into BAM files via Subreads' `align' function.
-#' @param dir_lists A list of directories, with two mandatory components:
-#'   `index', containing the location of the subread index; and `align', the
-#'   output directory of the BAM alignments.
-#' @param read_lists A list of vectors, with three mandatory components:
-#'   `reads1`, unnamed vector of FASTQ R1 reads; `reads2', unnamed vector of
-#'   FASTQ R2 reads; `align_base', unnamed vector of future BAM file locations.
-#' @param type String depicting input FASTQ type. Either "rna" or "dna". Default
-#'   is "rna".
-#' @param nthreads Positive integer for the number of threads to use. Default is
-#'   30.
-#' @return Void function. Output files are created at the location of the
-#'   `dir_lists$align'.
+#' @title Perform alignment of FASTQ files against Reference via
+#'   Subread
+#' @description Align FASTQ reads into BAM files via Subreads' `align'
+#'   function.
+#' @param dir_lists A list of directories, with two mandatory
+#'   components: `index', containing the location of the subread
+#'   index; and `align', the output directory of the BAM alignments.
+#' @param read_lists A list of vectors, with three mandatory
+#'   components: `reads1`, unnamed vector of FASTQ R1 reads; `reads2',
+#'   unnamed vector of FASTQ R2 reads; `align_base', unnamed vector of
+#'   future BAM file locations.
+#' @param nthreads Positive integer for the number of threads to use.
+#'   Default is 8.
+#' @param ... An ellipsis argument that is passed in Rsubreads's
+#'   `align' function. Typical values are `type' (default: "rna"),
+#'   `phredOffset' (default: 33), `output_format' (default: "BAM").
+#' @return Void function. Output files are created at the location of
+#'   the `dir_lists$align'.
 #' @examples
 #' test_dir <- tempdir()
 #' tiny <- system.file("extdata", "tiny.fa.gz", package = "CustomGenome")
@@ -482,27 +506,26 @@ retrieve_index <- function(genome_fasta, index_dir = NULL, ...) {
 #' retrieve_index(tiny, dir_lists$index)
 #' perform_alignment(dir_lists, read_lists, nthreads = 1)
 #' @export
-perform_alignment <- function(dir_lists, read_lists,
-                              type = "rna", nthreads = 30) {
+perform_alignment <- function(dir_lists, read_lists, nthreads = 8, ...) {
   stopifnot(c("index", "align") %in% names(dir_lists))
   stopifnot(c("reads1", "reads2", "align_base") %in% names(read_lists))
 
-  dir.create(dir_lists$index, recursive = TRUE, showWarnings = FALSE)
   dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
 
-  align(
-    index = dir_lists$index,
-    readfile1 = read_lists$reads1,
-    readfile2 = read_lists$reads2,
-    type = type, # or 0 for RNA, 1 for DNA or "dna"
-    output_format = "BAM",
-    output_file = file.path(
+  ellips <- validate_align_arguments(...)
+  ## Add required arguments
+  ellips$index <- dir_lists$index,
+  ellips$readfile1 <- read_lists$reads1,
+  ellips$readfile2 <- read_lists$reads2,
+  ellips$nthreads <- nthreads,
+  ellips$output_file <- file.path(
       dir_lists$align,
       read_lists$align_base
-    ),
-    phredOffset = 33,
-    nthreads = nthreads
   )
+  message("Alignment :", "threads=", ellips$nthreads)
+  do_align <- do.call(align, ellips)
+
+  message("Alignment: finished")
 }
 
 #' @title Summarize Subread alignment statistics
