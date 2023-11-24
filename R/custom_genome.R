@@ -423,17 +423,17 @@ prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
 #' @param index_dir String depicting the filepath of where the index directory
 #'   will be built. If \code{NULL}, then it will be in the same location as
 #'   the genome_fasta with "-subread-index" appended.
+#' @param ... Extra arguments to be passed into Subreads `buildindex' function.
 #' @return String depicting the filepath of the Subread index.
 #' @examples
 #' tiny <- system.file("extdata", "tiny.fa.gz", package = "CustomGenome")
 #' retrieve_index(tiny)
 #' @export
-retrieve_index <- function(genome_fasta, index_dir = NULL) {
+retrieve_index <- function(genome_fasta, index_dir = NULL, ...) {
     if (is.null(index_dir)) {
         index_dir <- paste0(
             file_path_sans_ext(file_path_sans_ext(genome_fasta)),
-            "-subread-index"
-        )
+            "-subread-index")
     }
     if (dir.exists(index_dir)) {
         message("Index already built: ", index_dir)
@@ -442,7 +442,8 @@ retrieve_index <- function(genome_fasta, index_dir = NULL) {
         message("Building Index at: ", index_dir)
         buildindex(
             basename = file.path(index_dir, "reference_index"),
-            reference = genome_fasta
+            reference = genome_fasta,
+            ...
         )
     }
     return(index_dir)
