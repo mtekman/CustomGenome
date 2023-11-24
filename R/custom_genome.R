@@ -430,23 +430,25 @@ prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
 #' retrieve_index(tiny)
 #' @export
 retrieve_index <- function(genome_fasta, index_dir = NULL, ...) {
-    if (is.null(index_dir)) {
-        index_dir <- paste0(
-            file_path_sans_ext(file_path_sans_ext(genome_fasta)),
-            "-subread-index")
-    }
-    if (dir.exists(index_dir)) {
-        message("Index already built: ", index_dir)
-    } else {
-        dir.create(index_dir)
-        message("Building Index at: ", index_dir)
-        buildindex(
-            basename = file.path(index_dir, "reference_index"),
-            reference = genome_fasta,
-            ...
-        )
-    }
-    return(file.path(index_dir, "reference_index"))
+  if (is.null(index_dir)) {
+    index_dir <- paste0(
+      file_path_sans_ext(file_path_sans_ext(genome_fasta)),
+      "-subread-index")
+  }
+  if (dir.exists(index_dir)) {
+    message("Index already built: ", index_dir)
+  } else {
+    dir.create(index_dir)
+    message("Building Index at: ", index_dir)
+    buildindex(
+      basename = file.path(index_dir, "reference_index"),
+      reference = genome_fasta,
+      ...
+    )
+  }
+  return(file.path(index_dir, "reference_index"))
+}
+
 }
 
 #' @title Perform alignment of FASTQ files against Reference via Subread
