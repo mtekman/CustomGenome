@@ -446,7 +446,7 @@ retrieve_index <- function(genome_fasta, index_dir = NULL, ...) {
             ...
         )
     }
-    return(index_dir)
+    return(file.path(index_dir, "reference_index"))
 }
 
 #' @title Perform alignment of FASTQ files against Reference via Subread
@@ -489,7 +489,7 @@ perform_alignment <- function(dir_lists, read_lists,
   dir.create(dir_lists$align, recursive = TRUE, showWarnings = FALSE)
 
   align(
-    index = file.path(dir_lists$index, "reference_index"),
+    index = dir_lists$index,
     readfile1 = read_lists$reads1,
     readfile2 = read_lists$reads2,
     type = type, # or 0 for RNA, 1 for DNA or "dna"
