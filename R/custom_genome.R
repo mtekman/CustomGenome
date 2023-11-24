@@ -546,13 +546,16 @@ summarize_alignment <- function(dir_align, read_align) {
 }
 
 
-#' @title Validate the Align Ellipsis Arguments for RSubread's Align
-#' @description Convert ellipsis arguments into a list and validate their value.
-#' @param ... An ellipsis argument that is passed in Rsubreads's `align'
-#'   function. Typical values are `featuretype' (default: "exon"), `isPairedEnd'
-#'   (default: TRUE), `nthreads' (default: 30).
-#' @return A list containing validated and/or modified ellipsis arguments.
-validate_align_arguments <- function(...) {
+#' @title Validate the featureCounts Ellipsis Arguments for RSubread's
+#'   featureCounts function.
+#' @description Convert ellipsis arguments into a list and validate
+#'   their value.
+#' @param ... An ellipsis argument that is passed in Rsubreads's
+#'   `featureCounts' function. Typical values are `GTF.featuretype'
+#'   (default: "exon"), `isPairedEnd' (default: TRUE).
+#' @return A list containing validated and/or modified ellipsis
+#'   arguments.
+validate_fc_arguments <- function(...) {
     ## Set default args for featurecounts
     ellips <- list(...)
     ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
@@ -564,9 +567,6 @@ validate_align_arguments <- function(...) {
     ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
         ellips$isPairedEnd
     )
-    ellips$nthreads <- ifelse(is.null(ellips$nthreads), 30,
-        ellips$nthreads
-    )
     ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
         ellips$juncCounts
     )
@@ -574,21 +574,25 @@ validate_align_arguments <- function(...) {
 }
 
 #' @title Generate Count Matrix from Aligned BAM files
-#' @description Perform feature counts on aligned data and produce a count
-#'   matrix and matrix statistics.
-#' @param dir_lists A list of two mandatory components: `align' containing the
-#'   directory of the alignment files, `count' containing the directory of where
-#'   the count matrix will be placed.
-#' @param gtf_file String depicting the filepath of where the GTF annotation
-#'   file is located.
-#' @param bam_pattern Pattern string depicting a way to match the BAM files in
-#'   the `align' directory.
-#' @param ... An ellipsis argument that is passed in Rsubreads's `align'
-#'   function. Typical values are `featuretype' (default: "exon"), `isPairedEnd'
-#'   (default: TRUE), `nthreads' (default: 30).
-#' @return A list of two components: `count' for the location of the count
-#'   matrix file, and `stat' for the location of the statistics file. Output
-#'   matrices and statistics are placed in the `dir_lists$count' directory.
+#' @description Perform feature counts on aligned data and produce a
+#'   count matrix and matrix statistics.
+#' @param dir_lists A list of two mandatory components: `align'
+#'   containing the directory of the alignment files, `count'
+#'   containing the directory of where the count matrix will be
+#'   placed.
+#' @param gtf_file String depicting the filepath of where the GTF
+#'   annotation file is located.
+#' @param bam_pattern Pattern string depicting a way to match the BAM
+#'   files in the `align' directory.
+#' @param nthreads Positive integer for the number of threads to use.
+#'   Default is 8.
+#' @param ... An ellipsis argument that is passed in Rsubreads's
+#'   `featurecounts' function. Typical values are `featuretype'
+#'   (default: "exon"), `isPairedEnd' (default: TRUE).
+#' @return A list of two components: `count' for the location of the
+#'   count matrix file, and `stat' for the location of the statistics
+#'   file. Output matrices and statistics are placed in the
+#'   `dir_lists$count' directory.
 #' @examples
 #' dir_lists <- list(align = system.file("extdata", package="CustomGenome"),
 #'                   count = tempdir())
@@ -596,18 +600,20 @@ validate_align_arguments <- function(...) {
 #' generate_count_matrix(dir_lists, gtf_file, bam_pattern="*test.bam$")
 #' @export
 generate_count_matrix <- function(dir_lists, gtf_file,
-                                  bam_pattern = "*align.bam$", ...) {
+                                  bam_pattern = "*align.bam$",
+                                  nthreads = 8, ...) {
   stopifnot(c("count", "align") %in% names(dir_lists))
   dir.create(dir_lists$count, recursive = TRUE, showWarnings = FALSE)
   bamfiles <- paste0(dir_lists$align, "/",
                      list.files(dir_lists$align, pattern = bam_pattern))
   names(bamfiles) <- basename(file_path_sans_ext(file_path_sans_ext(bamfiles)))
 
-  ellips <- validate_align_arguments(...)
+  ellips <- validate_fc_arguments(...)
   ## Add required arguments
   ellips$files <- bamfiles
   ellips$annot.ext <- gtf_file
   ellips$isGTFAnnotationFile <- TRUE
+  ellips$nthreads <- nthreads
 
   message("Counting ", ellips$GTF.featureType, " threads=", ellips$nthreads)
   fc <- do.call(featureCounts, ellips)
