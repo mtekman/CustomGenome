@@ -514,10 +514,10 @@ perform_alignment <- function(dir_lists, read_lists, nthreads = 8, ...) {
 
   ellips <- validate_align_arguments(...)
   ## Add required arguments
-  ellips$index <- dir_lists$index,
-  ellips$readfile1 <- read_lists$reads1,
-  ellips$readfile2 <- read_lists$reads2,
-  ellips$nthreads <- nthreads,
+  ellips$index <- dir_lists$index
+  ellips$readfile1 <- read_lists$reads1
+  ellips$readfile2 <- read_lists$reads2
+  ellips$nthreads <- nthreads
   ellips$output_file <- file.path(
       dir_lists$align,
       read_lists$align_base
