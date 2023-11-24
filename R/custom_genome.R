@@ -606,7 +606,7 @@ validate_fc_arguments <- function(...) {
 #' @param gtf_file String depicting the filepath of where the GTF
 #'   annotation file is located.
 #' @param bam_pattern Pattern string depicting a way to match the BAM
-#'   files in the `align' directory.
+#'   files in the `align' directory. Default is "*.bam$".
 #' @param nthreads Positive integer for the number of threads to use.
 #'   Default is 8.
 #' @param ... An ellipsis argument that is passed in Rsubreads's
@@ -623,13 +623,21 @@ validate_fc_arguments <- function(...) {
 #' generate_count_matrix(dir_lists, gtf_file, bam_pattern="*test.bam$")
 #' @export
 generate_count_matrix <- function(dir_lists, gtf_file,
-                                  bam_pattern = "*align.bam$",
+                                  bam_pattern = "*.bam$",
                                   nthreads = 8, ...) {
   stopifnot(c("count", "align") %in% names(dir_lists))
   dir.create(dir_lists$count, recursive = TRUE, showWarnings = FALSE)
-  bamfiles <- paste0(dir_lists$align, "/",
-                     list.files(dir_lists$align, pattern = bam_pattern))
+
+  found_bams <- list.files(dir_lists$align, pattern = bam_pattern)
+  message("Bam files found with pattern `", bam_pattern, "':\n - ",
+          paste0(found_bams, collapse = "\n - "))
+  if (length(found_bams) == 0) {
+    stop("No Bam files found. Perhaps adjust the `bam_pattern' arguments")
+  }
+
+  bamfiles <- paste0(dir_lists$align, "/", found_bams)
   names(bamfiles) <- basename(file_path_sans_ext(file_path_sans_ext(bamfiles)))
+
 
   ellips <- validate_fc_arguments(...)
   ## Add required arguments
