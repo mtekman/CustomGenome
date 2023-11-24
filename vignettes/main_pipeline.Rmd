@@ -293,7 +293,12 @@ overriden by the \code{nthreads} parameter. On a modern workhorse
 machine, this takes 10-20 minutes.
 
 ```R
-perform_alignment(dir_lists, read_lists)
+
+## Adjust the `nthreads' parameter to match the number of available
+## cores on your system.
+
+perform_alignment(dir_lists, read_lists, nthreads=30)
+
 ```
             Rsubread 2.14.2
     
@@ -428,7 +433,8 @@ makes sense to specify "exon" as our feature of interest.
 ```R
 generate_count_matrix(dir_lists,
                       new_genome_files$gtf,
-                      GTF.featureType = "exon")
+                      GTF.featureType = "exon",
+                      nthreads = 30)
 ```
 
 
