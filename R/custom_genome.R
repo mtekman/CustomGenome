@@ -584,21 +584,21 @@ summarize_alignment <- function(dir_lists, read_align) {
 #' @return A list containing validated and/or modified ellipsis
 #'   arguments.
 validate_fc_arguments <- function(...) {
-    ## Set default args for featurecounts
-    ellips <- list(...)
-    ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
-        ellips$GTF.attrType
-    )
-    ellips$GTF.featureType <- ifelse(is.null(ellips$GTF.featureType), "exon",
-        ellips$GTF.featureType
-    )
-    ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
-        ellips$isPairedEnd
-    )
-    ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
-        ellips$juncCounts
-    )
-    return(ellips)
+  ## Set default args for featurecounts
+  ellips <- list(...)
+  ellips$GTF.attrType <- ifelse(is.null(ellips$GTF.attrType), "gene_name",
+      ellips$GTF.attrType
+  )
+  ellips$GTF.featureType <- ifelse(is.null(ellips$GTF.featureType), "exon",
+      ellips$GTF.featureType
+  )
+  ellips$isPairedEnd <- ifelse(is.null(ellips$isPairedEnd), TRUE,
+      ellips$isPairedEnd
+  )
+  ellips$juncCounts <- ifelse(is.null(ellips$juncCounts), TRUE,
+      ellips$juncCounts
+  )
+  return(ellips)
 }
 
 #' @title Generate Count Matrix from Aligned BAM files
