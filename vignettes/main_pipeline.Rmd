@@ -81,8 +81,9 @@ data("user_sequences")
 
 ## Inserting the new FASTA sequences into genomic reference data
 
-We will use these above user sequences and append them to our reference data.
-To do so, we first need to retrieve the remote genome files from Ensembl.
+We will use these above user sequences and append them to our
+reference data.  To do so, we first need to retrieve the remote genome
+files from Ensembl.
 
 This can be performed in two ways:
 
@@ -97,12 +98,15 @@ for this genomes.
 
 Genomes FASTA sequences and their accompanying Annotation GTF files
 are downloaded via the `wget` method. Checksums for these files (based
-on UNIX's sum commandline utility) are also downloaded and validated locally.
+on UNIX's sum commandline utility) are also downloaded and validated
+locally.
 
-This step can take approximately 10 minutes to download required files.
+This step can take approximately 10 minutes to download required
+files.
 
-In this example, we will download the latest *Homo Sapiens* genome, and store it
-in a local "genomes" folder. Using the `get_genome_files` function.
+In this example, we will download the latest *Homo Sapiens* genome,
+and store it in a local "genomes" folder. Using the `get_genome_files`
+function.
 
 
 ```R
@@ -145,7 +149,7 @@ xen_trop <- get_genome_files(urls_override=list(
   gtf=paste0(base_url,  "/gtf/xenopus_tropicalis/",
              "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.105.gtf.gz"),
   fasta=paste0(base_url, "/fasta/xenopus_tropicalis/dna/",
-             "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz")))
+          "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz")))
 xen_trop
 ```
 
@@ -389,7 +393,7 @@ perform_alignment(dir_lists, read_lists, nthreads=30)
 |                          **Indels** |196881   | 207353   | 201441   |
 
 ```R
-summarize_alignment(dir_lists$align, read_lists$align)
+summarize_alignment(dir_lists, read_lists$align)
 ```
 
     > Wrote: 2_bams/stats_summary.tsv
@@ -485,6 +489,8 @@ generate_count_matrix(dir_lists,
     
     Stats written to: 3_counts/exon.gene_name.stats.tsv
     Counts written to: 3_counts/exon.gene_name.matrix.tsv
+
+
 
 # Session info
 

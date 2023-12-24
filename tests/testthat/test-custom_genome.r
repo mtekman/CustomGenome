@@ -12,7 +12,6 @@ tiny_gtf <- system.file("extdata", "tiny.gtf.gz", package="CustomGenome")
 r1_fastq <- system.file("extdata", "r1.fq.gz", package="CustomGenome")
 r2_fastq <- system.file("extdata", "r2.fq.gz", package="CustomGenome")
 
-
 test_that("sysfiles", {
   expect_equal(file.exists(sub4), TRUE)
   expect_equal(file.exists(sub8), TRUE)
@@ -198,17 +197,16 @@ test_that("all_subread_commands", {
 
   read_lists <- list(reads1 = c(r1_fastq), reads2 = c(r2_fastq),
                      align_base = "test.bam")
-
   dir_lists <- list(
     index = paste0(test_dir, "-subread-index"),
     align = paste0(test_dir, "-aligned"),
-    count = paste0(test_dir, "-counts")
+    count = paste0(test_dir, "-counts"),
+    stats = paste0(test_dir, "-stats")
   )
 
   if (dir.exists(dir_lists$index)) {
     unlink(dir_lists$index, recursive = TRUE)
   }
-
   ## Build Index
   mes <- capture_messages(capture_output(
     zz <- retrieve_index(tiny, dir_lists$index)))
@@ -221,10 +219,11 @@ test_that("all_subread_commands", {
 
   ## Run again, this time with retrieval only
   mes <- capture_messages(res <- retrieve_index(tiny, dir_lists$index))
-  expect_equal(res, dir_lists$index)
+  expect_equal(res, file.path(dir_lists$index, "reference_index"))
   expect_equal(mes, paste0("Index already built: ", dir_lists$index, "\n"))
 
   ## Perform Alignment
+  dir_lists$index <- res
   mes <- capture_output(res <- perform_alignment(dir_lists, read_lists,
                                                  nthreads = 1))
   ## Check Alignment
@@ -240,10 +239,10 @@ test_that("all_subread_commands", {
 
   ## Check summary
   mes <- capture_messages(res <- summarize_alignment(
-                            dir_lists$align,
+                            dir_lists,
                             read_lists$align_base))
   expect_equal(
-    file.exists(file.path(dir_lists$align, "stats_summary.tsv")),
+    file.exists(file.path(dir_lists$align, "test.bam.summary")),
     TRUE
   )
   expect_equal(res$Percentage_Mapped, 100)
@@ -264,4 +263,5 @@ test_that("all_subread_commands", {
   if (dir.exists(dir_lists$align)) {
     unlink(dir_lists$index, recursive = TRUE)
   }
+  unlink(tempdir(), recursive=TRUE)
 })

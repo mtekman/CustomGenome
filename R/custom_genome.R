@@ -7,7 +7,7 @@
 #' @importFrom GenomicRanges GRanges
 #' @importFrom Rsubread buildindex align featureCounts
 #' @importFrom tools file_path_sans_ext
-#' @importFrom utils download.file read.table write.table
+#' @importFrom utils download.file read.table write.table capture.output
 
 #' @title Get the URLs for the genome files
 #' @description Dynamically generates URLs for the FASTA and GTF files of a
@@ -500,11 +500,11 @@ validate_align_arguments <- function(...) {
 #'     align_base = c("align.bam")
 #' )
 #' dir_lists <- list(
-#'     index = paste0(test_dir, "-subread-index"),
+#'     index = retrieve_index(tiny, paste0(test_dir, "-subread-index")),
 #'     align = paste0(test_dir, "-aligned"),
-#'     count = paste0(test_dir, "-counts")
+#'     count = paste0(test_dir, "-counts"),
+#'     stats = paste0(test_dir, "-stats")
 #' )
-#' retrieve_index(tiny, dir_lists$index)
 #' perform_alignment(dir_lists, read_lists, nthreads = 1)
 #' @export
 perform_alignment <- function(dir_lists, read_lists, nthreads = 8, ...) {
@@ -532,6 +532,7 @@ perform_alignment <- function(dir_lists, read_lists, nthreads = 8, ...) {
     split = TRUE
   )
   message("Alignment : finished")
+  return(do_align)
 }
 
 #' @title Summarize Subread alignment statistics
@@ -628,65 +629,49 @@ validate_fc_arguments <- function(...) {
 #'   `dir_lists$count' directory.
 #' @examples
 #' dir_lists <- list(align = system.file("extdata", package="CustomGenome"),
-#'                   count = tempdir())
+#'                   count = tempdir(), stats = tempdir())
 #' gtf_file <- system.file("extdata", "tiny.gtf.gz", package="CustomGenome")
 #' generate_count_matrix(dir_lists, gtf_file, bam_pattern="*test.bam$")
 #' @export
-generate_count_matrix <- function(dir_lists, gtf_file,
-                                  bam_pattern = "*.bam$",
+generate_count_matrix <- function(dir_lists, gtf_file, bam_pattern = "*.bam$",
                                   nthreads = 8, ...) {
   stopifnot(c("count", "align", "stats") %in% names(dir_lists))
   dir.create(dir_lists$count, recursive = TRUE, showWarnings = FALSE)
-
   found_bams <- list.files(dir_lists$align, pattern = bam_pattern)
   message("Bam files found with pattern `", bam_pattern, "':\n - ",
           paste0(found_bams, collapse = "\n - "))
   if (length(found_bams) == 0) {
     stop("No Bam files found. Perhaps adjust the `bam_pattern' arguments")
   }
-
   bamfiles <- paste0(dir_lists$align, "/", found_bams)
   names(bamfiles) <- basename(file_path_sans_ext(file_path_sans_ext(bamfiles)))
 
-
   ellips <- validate_fc_arguments(...)
   ## Add required arguments
-  ellips$files <- bamfiles
-  ellips$annot.ext <- gtf_file
-  ellips$isGTFAnnotationFile <- TRUE
-  ellips$nthreads <- nthreads
+  ellips$files <- bamfiles; ellips$annot.ext <- gtf_file
+  ellips$isGTFAnnotationFile <- TRUE; ellips$nthreads <- nthreads
 
   message("Counting : ", ellips$GTF.featureType, " threads=", ellips$nthreads)
-  out_log <- file.path(dir_lists$stats, "count.log")
-  std_out <- capture.output(
-    fc <- do.call(featureCounts, ellips),
-    file = out_log,
-    split = TRUE
-  )
+  out_log <- file.path(dir_lists$stats, paste0("count.", ellips$GTF.featureType, ".",
+                                               ellips$GTF.attrType, ".log"))
+  std_out <- capture.output(fc <- do.call(featureCounts, ellips), file = out_log,
+                            split = TRUE)
   message("Counting : finished")
-
-  count_table <- fc$counts
-  count_stat <- fc$stat
+  count_table <- fc$counts;count_stat <- fc$stat;
   count_table <- count_table[order(rownames(count_table)), ]
-
   cleaner_sample_names <- function(cnames) {
     cln <- basename(file_path_sans_ext(file_path_sans_ext(cnames)))
     return(sub("[._+:]align$", "", cln))
   }
-
   ## In the case of a single BAM file, still give it a name
-  if (is.null(colnames(count_table))) {
-    count_table <- as.data.frame(count_table)
-    colnames(count_table) <- names(bamfiles)
-  }
+  if (is.null(colnames(count_table))) { count_table <- as.data.frame(count_table);
+      colnames(count_table) <- names(bamfiles)}
   colnames(count_table) <- cleaner_sample_names(colnames(count_table))
   colnames(count_stat) <- cleaner_sample_names(colnames(count_stat))
-
-  out_stat <- paste0(file.path(dir_lists$stats,  ellips$GTF.featureType),
-                     ".", ellips$GTF.attrType, ".stats.tsv")
-
-  out_count <- paste0(file.path(dir_lists$count, ellips$GTF.featureType),
-                      ".", ellips$GTF.attrType, ".matrix.tsv")
+  out_stat <- file.path(dir_lists$stats, paste0("count.", ellips$GTF.featureType, ".",
+                                                ellips$GTF.attrType, ".stats.tsv"))
+  out_count <- file.path(dir_lists$count, paste0(ellips$GTF.featureType, ".",
+                                                 ellips$GTF.attrType, ".matrix.tsv"))
   ## Write Stats
   write.table(count_stat, out_stat, sep = "\t",
               quote = FALSE, col.names = TRUE, row.names = FALSE)
