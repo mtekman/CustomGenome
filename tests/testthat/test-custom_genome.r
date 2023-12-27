@@ -66,18 +66,6 @@ test_that("get_genome_files", {
                ))
 })
 
-## Dependent on last test running
-test_that("check_sum_matches", {
-  capture_messages(res <- check_sum_matches(
-                     paste0(
-                       "http://ftp.ensembl.org/pub/release-105/gtf/",
-                       "mus_musculus/Mus_musculus.GRCm39.105.abinitio.gtf.gz"
-                     ),
-                     file.path(tmp_dir, "Mus_musculus.GRCm39.105.abinitio.gtf.gz")
-                   ))
-  expect_equal(res, TRUE)
-})
-
 test_that("check_sum_matches", {
   capture_messages(
     res <- check_sum_matches(
