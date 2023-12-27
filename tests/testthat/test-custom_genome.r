@@ -19,6 +19,7 @@ test_that("sysfiles", {
   expect_equal(file.exists(tiny), TRUE)
 })
 
+tmp_dir <- tempdir()
 
 test_that("get_genome_urls_default", {
   expect_equal(
@@ -54,12 +55,13 @@ test_that("get_genome_urls_custom", {
 test_that("get_genome_files", {
   capture_messages(res <- get_genome_files(
                      fasta_type = "dna_rm.nonchromosomal",
-                     gtf_type = "abinitio.gtf", output_folder = "/tmp"
+                     gtf_type = "abinitio.gtf", output_folder = tmp_dir
                    ))
   expect_equal(res,
                list(
-                 gtf = "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz",
-                 fasta = "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
+                 gtf = file.path(tmp_dir, "Mus_musculus.GRCm39.105.abinitio.gtf.gz"),
+                 fasta = file.path(tmp_dir,
+                                   "Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz")
                ))
 })
 
@@ -70,7 +72,7 @@ test_that("check_sum_matches", {
                        "http://ftp.ensembl.org/pub/release-105/gtf/",
                        "mus_musculus/Mus_musculus.GRCm39.105.abinitio.gtf.gz"
                      ),
-                     "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz"
+                     file.path(tmp_dir, "Mus_musculus.GRCm39.105.abinitio.gtf.gz")
                    ))
   expect_equal(res, TRUE)
 })
@@ -82,7 +84,7 @@ test_that("check_sum_matches", {
         "http://ftp.ensembl.org/pub/release-105/fasta/",
         "mus_musculus/dna/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
       ),
-      "/tmp/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
+      file.path(tmp_dir, "Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz")
     ))
   expect_equal(res, TRUE)
 })

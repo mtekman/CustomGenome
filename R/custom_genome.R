@@ -93,11 +93,11 @@ get_genome_urls <- function(species = "mus_musculus",
 #' @return logical. If the file is consistent with that on the remote server.
 #' @examples
 #' get_genome_files(fasta_type = "dna_rm.nonchromosomal",
-#'                  gtf_type = "abinitio.gtf", output_folder = "/tmp")
+#'                  gtf_type = "abinitio.gtf", output_folder = tempdir())
 #' CustomGenome:::check_sum_matches(paste0("http://ftp.ensembl.org/",
 #'                          "pub/release-105/gtf/mus_musculus/",
 #'                          "Mus_musculus.GRCm39.105.abinitio.gtf.gz"),
-#'                     "/tmp/Mus_musculus.GRCm39.105.abinitio.gtf.gz")
+#'                  file.path(tempdir(), "Mus_musculus.GRCm39.105.abinitio.gtf.gz"))
 check_sum_matches <- function(url, outfile) {
   parse_check_sum <- function(str) {
     res_split <- unlist(strsplit(str, split = "\\s+"))
@@ -161,7 +161,7 @@ check_sum_matches <- function(url, outfile) {
 #' @examples
 #' mus_musc = get_genome_files(
 #'     species = "mus_musculus",
-#'     output_folder = "/tmp",
+#'     output_folder = tempdir(),
 #'     fasta_type = "dna_rm.nonchromosomal",
 #'     gtf_type = "abinitio.gtf"
 #' )
