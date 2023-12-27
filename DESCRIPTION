@@ -1,15 +1,15 @@
 Package: CustomGenome
 Type: Package
 Title: Append Custom FASTA Sequences to your Genome and Annotation
-       Files for Downstream Mapping
+        Files for Downstream Mapping
 Version: 0.99.1
 Authors@R: 
     c(person(given="Mehmet", family="Tekman",
-      email = "mtekman89@gmail.com",
-      role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4181-2676")),
-      person(given="Sebastian", family="Arnold",
-      email = "sebastian.arnold@pharmakol.uni-freiburg.de",
-      role = c("fnd"), comment = c(ORCID = "0000-0002-2688-9210")))
+        email = "mtekman89@gmail.com",
+        role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4181-2676")),
+        person(given="Sebastian", family="Arnold",
+        email = "sebastian.arnold@pharmakol.uni-freiburg.de",
+        role = c("fnd"), comment = c(ORCID = "0000-0002-2688-9210")))
 Description: CustomGenome generates a new Ensembl reference genome
     sequence and annotation files with custom FASTA sequences (e.g.
     GFP, Tomato) and produces RNA-seq count matrices with them. Genome
@@ -25,9 +25,9 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 biocViews: Annotation, RNASeq, Alignment, MultipleSequenceAlignment, QualityControl,
-           Preprocessing, Sequencing, DataImport, GeneExpression
+            Preprocessing, Sequencing, DataImport, GeneExpression
 Imports: Rsubread (>= 2.14.2), Biostrings (>= 2.68.1), rtracklayer (>= 1.60.0),
-         GenomicRanges (>= 1.52.0), tools, utils
+            GenomicRanges (>= 1.52.0), tools, utils
 Suggests:
     Rsamtools,
     BiocStyle,
