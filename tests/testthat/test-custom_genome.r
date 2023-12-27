@@ -55,7 +55,8 @@ test_that("get_genome_urls_custom", {
 test_that("get_genome_files", {
   capture_messages(res <- get_genome_files(
                      fasta_type = "dna_rm.nonchromosomal",
-                     gtf_type = "abinitio.gtf", output_folder = tmp_dir
+                     gtf_type = "abinitio.gtf", output_folder = tmp_dir,
+                     download_timeout = 10000
                    ))
   expect_equal(res,
                list(

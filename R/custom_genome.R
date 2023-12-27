@@ -163,7 +163,8 @@ check_sum_matches <- function(url, outfile) {
 #'     species = "mus_musculus",
 #'     output_folder = tempdir(),
 #'     fasta_type = "dna_rm.nonchromosomal",
-#'     gtf_type = "abinitio.gtf"
+#'     gtf_type = "abinitio.gtf",
+#'     download_timeout = 10000
 #' )
 #' @export
 get_genome_files <- function(species = "mus_musculus",
