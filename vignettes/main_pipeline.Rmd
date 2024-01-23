@@ -3,13 +3,13 @@ title: "CustomGenome reference manual"
 date: "`r Sys.Date()`"
 author: "Mehmet Tekman"
 output:
-  html_document:
-    toc: true
-    toc_depth: 3
+    html_document:
+        toc: true
+        toc_depth: 3
 vignette: >
-  %\VignetteIndexEntry{Example CustomGenome analysis}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+    %\VignetteIndexEntry{Example CustomGenome analysis}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
 ---
 \tableofcontents
 ```{r echo=FALSE}
@@ -31,7 +31,6 @@ of bulk RNA-seq data using the `CustomGenome` package.
 This package provides an easy-to-use pipeline of R functions to
 quantify and analyze custom sequences for genomes of choice.
 
-
 #### Pre-requisites
 
 This vignette provides a manual for the quantification of bulk RNA-seq
@@ -42,8 +41,7 @@ The workflow is split into two stages:
 
 1. Inserting the new FASTA sequences into genomic reference data
 2. Performing alignment and quantification via Rsubread of this new
-   genomic reference.
-
+    genomic reference.
 
 # Example CustomGenome analysis
 
@@ -52,23 +50,37 @@ describing GFP and Tomato sequences:
 
 ```
 >One
-ATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGG
-GCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACCGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCCTGACCTA
-CGGCGTGCAGTGCTTCAGCCGCTACCCCGACCACATGAAGCAGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTC
-TTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGG
-ACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAG
+ATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGT
+CGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGG
+GCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACC
+ACCGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCCTGACCTA
+CGGCGTGCAGTGCTTCAGCCGCTACCCCGACCACATGAAGCAGCACGACT
+TCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTC
+TTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGG
+CGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGG
+ACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAAC
+GTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAG
 >Two
-ATGGCGACGTGAACGGACACAAGTTCAGCGTGTCCGGCGAGGGGGAGGGGGATGCCACATACGGAAAGCTGACCCTGAAGTTTATCTGCACCACCGGCAA
-GCTGCCCGTGCCCTGGCCTACACTCGTGACCACACTGACCTACGGCGTGCAGTGCTTCTCCAGATACCCCGACCATATGAAGCAGCACGACTTCTTCAAG
-AGCGCCATGCCTGAGGGCTACGTGCAGGAAAGAACCATCTTCTTTAAGGACGACGGCAACTACAAGACCAGGGCCGAAGTGAAGTTTGAGGGCGACACCC
-TCGTGAACAGAATCGAGCTGAAGGGGATCGACTTCAAAGAGGACGGCAACATCCTGGGCCACAAGCTGGAGTACAACTACAACTCCCACAACGTGTACAT
+ATGGCGACGTGAACGGACACAAGTTCAGCGTGTCCGGCGAGGGGGAGGGG
+GATGCCACATACGGAAAGCTGACCCTGAAGTTTATCTGCACCACCGGCAA
+GCTGCCCGTGCCCTGGCCTACACTCGTGACCACACTGACCTACGGCGTGC
+AGTGCTTCTCCAGATACCCCGACCATATGAAGCAGCACGACTTCTTCAAG
+AGCGCCATGCCTGAGGGCTACGTGCAGGAAAGAACCATCTTCTTTAAGGA
+CGACGGCAACTACAAGACCAGGGCCGAAGTGAAGTTTGAGGGCGACACCC
+TCGTGAACAGAATCGAGCTGAAGGGGATCGACTTCAAAGAGGACGGCAAC
+ATCCTGGGCCACAAGCTGGAGTACAACTACAACTCCCACAACGTGTACAT
 CATGGCCGACAAACAGAAAAACGGCATCAAAGTGA
 >Three
-ATGGTGTCCAAGGGCGAGGAAGTGATCAAAGAGTTCATGCGGTTCAAAGTGCGGATGGAAGGCAGCATGAACGGCCACGAGTTCGAGATCGAGGGCGAGG
-GCGAAGGCAGACCTTACGAGGGCACACAGACCGCCAAGCTGAAAGTGACCAAGGGCGGACCCCTGCCCTTCGCCTGGGATATTCTGAGCCCCCAGTTTAT
-GTACGGCAGCAAGGCCTACGTGAAGCACCCCGCCGACATCCCCGACTACAAGAAGCTGAGCTTCCCCGAGGGCTTCAAGTGGGAGAGAGTGATGAACTTC
-GAGGACGGCGGCCTCGTGACCGTGACACAGGATAGCAGCCTGCAGGACGGCACCCTGATCTACAAAGTGAAGATGAGAGGCACCAACTTCCCCCCCGACG
-GCCCCGTGATGCAGAAAAAGACTATGGGCTGGGAGGCCAGCACCGAGAGACTGTACCCTAGAGATGGCGTGCTGAAGGGCGAGATCCACCAGGCCCTGAA
+ATGGTGTCCAAGGGCGAGGAAGTGATCAAAGAGTTCATGCGGTTCAAAGT
+GCGGATGGAAGGCAGCATGAACGGCCACGAGTTCGAGATCGAGGGCGAGG
+GCGAAGGCAGACCTTACGAGGGCACACAGACCGCCAAGCTGAAAGTGACC
+AAGGGCGGACCCCTGCCCTTCGCCTGGGATATTCTGAGCCCCCAGTTTAT
+GTACGGCAGCAAGGCCTACGTGAAGCACCCCGCCGACATCCCCGACTACA
+AGAAGCTGAGCTTCCCCGAGGGCTTCAAGTGGGAGAGAGTGATGAACTTC
+GAGGACGGCGGCCTCGTGACCGTGACACAGGATAGCAGCCTGCAGGACGG
+CACCCTGATCTACAAAGTGAAGATGAGAGGCACCAACTTCCCCCCCGACG
+GCCCCGTGATGCAGAAAAAGACTATGGGCTGGGAGGCCAGCACCGAGAGA
+CTGTACCCTAGAGATGGCGTGCTGAAGGGCGAGATCCACCAGGCCCTGAA
 GCTGAAG
 ```
 
@@ -111,7 +123,7 @@ function.
 
 ```R
 homo_sap = get_genome_files(species="homo_sapiens",
-                           output_folder="genomes")
+                            output_folder="genomes")
 homo_sap
 ```
 
@@ -146,10 +158,10 @@ genome FASTA and GTF annotation file.
 ```R
 base_url <- "http://ftp.ensembl.org/pub/release-105"
 xen_trop <- get_genome_files(urls_override=list(
-  gtf=paste0(base_url,  "/gtf/xenopus_tropicalis/",
-             "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.105.gtf.gz"),
-  fasta=paste0(base_url, "/fasta/xenopus_tropicalis/dna/",
-          "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz")))
+    gtf=paste0(base_url,  "/gtf/xenopus_tropicalis/",
+        "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.105.gtf.gz"),
+    fasta=paste0(base_url, "/fasta/xenopus_tropicalis/dna/",
+        "Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz")))
 xen_trop
 ```
 
@@ -157,12 +169,11 @@ Once again the `get_genome_files` function outputs a GTF and FASTA
 component which will be used later in the downstream annotation.
 
     ## Outputs:
-    $gtf   : 'genomes/Xenopus_tropicalis.Xenopus_tropicalis_v9.1.105.gtf.gz'
-    $fasta : 'genomes/Xenopus_tropicalis.Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz'
+    $gtf   : 'genomes/Xenopus_tropicalis_v9.1.105.gtf.gz'
+    $fasta : 'genomes/Xenopus_tropicalis_v9.1.dna.toplevel.fa.gz'
 
 
 ## Appending New Sequences
-
 
 This is the part where we insert our user-FASTA exogenous sequences
 into the genome sequence and annotation files.
@@ -173,7 +184,6 @@ with a single "exon" that spans the entire sequence given.
 This is performed via the function `add_seqs_to_gtf_and_fasta` which
 takes as input the output from the `get_genome_files` function above,
 along with the filename for the user-sequences.
-
 
 ```R
 my_exogenous_sequences <- "user_sequences.fasta"  ## filename to user-FASTA
@@ -209,7 +219,6 @@ new sequence and annotation files, in the same manner as `get_genome_files`.
     $gtf   : 'genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz'
     $fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_Two_Three.fa.gz'
 
-
 ## Performing alignment and quantification of this new genomic reference.
 
 At this stage we have all the custom generated reference files that we
@@ -225,8 +234,6 @@ need to perform alignment of our sequences. This involves three steps:
 
 ### Building an alignment index for the new custom genome
 
-These
-
 ```R
 index_dir <- retrieve_index(new_genome_files$fasta)
 index_dir
@@ -238,7 +245,7 @@ index_dir
 
 
     # Outputs
-    'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index'
+    'Homo_sapiens.GRCh38.dna.primary_assembly_with_GFP_TB-subread-index'
 
 Depending on the size of the genome, this can take about an hour, due
 to their being no real way to speed it up via multiple cores. One can
@@ -249,10 +256,10 @@ overcome any speed issues due to paging.
 
 ```R
 dir_lists <- list(index=index_dir,   ## From previous step
-                  fastq="1_fastqs",
-                  align="2_bams",
-                  count="3_counts",
-                  stats="stats")
+                fastq="1_fastqs",
+                align="2_bams",
+                count="3_counts",
+                stats="stats")
 
 read_lists <- prime_fastq_files(dir_lists$fastq, "R1.fastq.gz", "R2.fastq.gz")
 read_lists
@@ -260,34 +267,34 @@ read_lists
 
     # Outputs
     $reads1 : '1_fastqs_remote_mount/Group1_1_R1.fastq.gz'
-              '1_fastqs_remote_mount/Group1_2_R1.fastq.gz'
-              '1_fastqs_remote_mount/Group1_3_R1.fastq.gz'
-              '1_fastqs_remote_mount/Group2_1_R1.fastq.gz'
-              '1_fastqs_remote_mount/Group2_2_R1.fastq.gz'
-              '1_fastqs_remote_mount/Group2_3_R1.fastq.gz'
-              '1_fastqs_remote_mount/Group3_1_R1.fastq.gz'
-              '1_fastqs_remote_mount/Group3_2_R1.fastq.gz'
-              '1_fastqs_remote_mount/Group3_3_R1.fastq.gz'
+            '1_fastqs_remote_mount/Group1_2_R1.fastq.gz'
+            '1_fastqs_remote_mount/Group1_3_R1.fastq.gz'
+            '1_fastqs_remote_mount/Group2_1_R1.fastq.gz'
+            '1_fastqs_remote_mount/Group2_2_R1.fastq.gz'
+            '1_fastqs_remote_mount/Group2_3_R1.fastq.gz'
+            '1_fastqs_remote_mount/Group3_1_R1.fastq.gz'
+            '1_fastqs_remote_mount/Group3_2_R1.fastq.gz'
+            '1_fastqs_remote_mount/Group3_3_R1.fastq.gz'
 
     $reads2 : '1_fastqs_remote_mount/Group1_1_R2.fastq.gz'
-              '1_fastqs_remote_mount/Group1_2_R2.fastq.gz'
-              '1_fastqs_remote_mount/Group1_3_R2.fastq.gz'
-              '1_fastqs_remote_mount/Group2_1_R2.fastq.gz'
-              '1_fastqs_remote_mount/Group2_2_R2.fastq.gz'
-              '1_fastqs_remote_mount/Group2_3_R2.fastq.gz'
-              '1_fastqs_remote_mount/Group3_1_R2.fastq.gz'
-              '1_fastqs_remote_mount/Group3_2_R2.fastq.gz'
-              '1_fastqs_remote_mount/Group3_3_R2.fastq.gz'
+            '1_fastqs_remote_mount/Group1_2_R2.fastq.gz'
+            '1_fastqs_remote_mount/Group1_3_R2.fastq.gz'
+            '1_fastqs_remote_mount/Group2_1_R2.fastq.gz'
+            '1_fastqs_remote_mount/Group2_2_R2.fastq.gz'
+            '1_fastqs_remote_mount/Group2_3_R2.fastq.gz'
+            '1_fastqs_remote_mount/Group3_1_R2.fastq.gz'
+            '1_fastqs_remote_mount/Group3_2_R2.fastq.gz'
+            '1_fastqs_remote_mount/Group3_3_R2.fastq.gz'
 
     $align_base : 'Group1_1_align.bam'
-                  'Group1_2_align.bam'
-                  'Group1_3_align.bam'
-                  'Group2_1_align.bam'
-                  'Group2_2_align.bam'
-                  'Group2_3_align.bam'
-                  'Group3_1_align.bam'
-                  'Group3_2_align.bam'
-                  'Group3_3_align.bam'
+                'Group1_2_align.bam'
+                'Group1_3_align.bam'
+                'Group2_1_align.bam'
+                'Group2_2_align.bam'
+                'Group2_3_align.bam'
+                'Group3_1_align.bam'
+                'Group3_2_align.bam'
+                'Group3_3_align.bam'
 
 
 ### Perform Alignment
@@ -421,15 +428,15 @@ cat genomes/Homo_sapiens.GRCh38.105_with_GFP_TB.gtf \
     | awk '{print $3}' \
     | sort | uniq -c
 
- 838953 CDS
-1303844 exon
- 190471 three_prime_utr
- 166088 five_prime_utr
-  20633 gene
- 165137 transcript
+    838953 CDS
+    1303844 exon
+    190471 three_prime_utr
+    166088 five_prime_utr
+    20633 gene
+    165137 transcript
     119 Selenocysteine
-  94057 start_codon
-  87585 stop_codon
+    94057 start_codon
+    87585 stop_codon
 ```
 
 Our annotated sequences will appear only as exons in a new gene, so it
@@ -437,56 +444,56 @@ makes sense to specify "exon" as our feature of interest.
 
 ```R
 generate_count_matrix(dir_lists,
-                      new_genome_files$gtf,
-                      GTF.featureType = "exon",
-                      nthreads = 30)
+                    new_genome_files$gtf,
+                    GTF.featureType = "exon",
+                    nthreads = 30)
 ```
 
 
     Counting exon threads=30
     
     
-           Rsubread 2.14.2
+            Rsubread 2.14.2
     
-    //========================== featureCounts setting =======================\\
-    ||                                                                        ||
-    ||             Input files : 9 BAM files                                  ||
-    ||                                                                        ||
-    ||                           Group1_1_align.bam                           ||
-    ||                           Group3_3_align.bam                           ||
-    ||                                                                        ||
-    ||              Paired-end : yes                                          ||
-    ||        Count read pairs : yes                                          ||
-    ||              Annotation : Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ( ||
-    ||      Dir for temp files : .                                            ||
-    ||       Junction Counting : <output_file>.jcounts                        ||
-    ||                 Threads : 30                                           ||
-    ||                   Level : meta-feature level                           ||
-    ||      Multimapping reads : counted                                      ||
-    || Multi-overlapping reads : not counted                                  ||
-    ||   Min overlapping bases : 1                                            ||
-    ||                                                                        ||
-    \\========================================================================//
+    //========================== featureCounts setting ======================\\
+    ||                                                                       ||
+    ||             Input files : 9 BAM files                                 ||
+    ||                                                                       ||
+    ||                           Group1_1_align.bam                          ||
+    ||                           Group3_3_align.bam                          ||
+    ||                                                                       ||
+    ||              Paired-end : yes                                         ||
+    ||        Count read pairs : yes                                         ||
+    ||              Annotation : Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz (||
+    ||      Dir for temp files : .                                           ||
+    ||       Junction Counting : <output_file>.jcounts                       ||
+    ||                 Threads : 30                                          ||
+    ||                   Level : meta-feature level                          ||
+    ||      Multimapping reads : counted                                     ||
+    || Multi-overlapping reads : not counted                                 ||
+    ||   Min overlapping bases : 1                                           ||
+    ||                                                                       ||
+    \\=======================================================================//
     
-    //================================= Running ==============================\\
-    ||                                                                        ||
-    || Load annotation file Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ...    ||
-    ||    Features : 1293866                                                  ||
-    ||    Meta-features : 20004                                               ||
-    ||    Chromosomes/contigs : 27                                            ||
-    ||                                                                        ||
-    || Process BAM file Group3_3_align.bam...                                 ||
-    ||    Paired-end reads are included.                                      ||
-    ||    Total alignments : 52643874                                         ||
-    ||    Successfully assigned alignments : 42705701 (81.1%)                 ||
-    ||    Running time : 0.13 minutes                                         ||
-    ||                                                                        ||
-    || Write the final count table.                                           ||
-    || Write the junction count table.                                        ||
-    || Write the read assignment summary.                                     ||
-    ||                                                                        ||
-    \\========================================================================//
-    
+    //================================= Running =============================\\
+    ||                                                                       ||
+    || Load annotation file Homo_sapiens.GRCh38.105_with_GFP_TB.gtf.gz ...   ||
+    ||    Features : 1293866                                                 ||
+    ||    Meta-features : 20004                                              ||
+    ||    Chromosomes/contigs : 27                                           ||
+    ||                                                                       ||
+    || Process BAM file Group3_3_align.bam...                                ||
+    ||    Paired-end reads are included.                                     ||
+    ||    Total alignments : 52643874                                        ||
+    ||    Successfully assigned alignments : 42705701 (81.1%)                ||
+    ||    Running time : 0.13 minutes                                        ||
+    ||                                                                       ||
+    || Write the final count table.                                          ||
+    || Write the junction count table.                                       ||
+    || Write the read assignment summary.                                    ||
+    ||                                                                       ||
+    \\=======================================================================//
+
     Stats written to: 3_counts/exon.gene_name.stats.tsv
     Counts written to: 3_counts/exon.gene_name.matrix.tsv
 
@@ -504,11 +511,11 @@ sessionInfo()
     Running under: Arch Linux
     
     locale:
-     [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C
-     [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8
-     [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8
-     [7] LC_PAPER=en_US.UTF-8       LC_NAME=C
-     [9] LC_ADDRESS=C               LC_TELEPHONE=C
+    [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C
+    [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8
+    [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8
+    [7] LC_PAPER=en_US.UTF-8       LC_NAME=C
+    [9] LC_ADDRESS=C               LC_TELEPHONE=C
     [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C
     
     time zone: Europe/Zurich
@@ -519,17 +526,17 @@ sessionInfo()
     [8] methods   base
     
     other attached packages:
-     [1] Rsubread_2.14.2      Biostrings_2.68.1    XVector_0.40.0
-     [4] rtracklayer_1.60.0   GenomicRanges_1.52.0 GenomeInfoDb_1.36.1
-     [7] IRanges_2.34.1       S4Vectors_0.38.1     BiocGenerics_0.46.0
+    [1] Rsubread_2.14.2      Biostrings_2.68.1    XVector_0.40.0
+    [4] rtracklayer_1.60.0   GenomicRanges_1.52.0 GenomeInfoDb_1.36.1
+    [7] IRanges_2.34.1       S4Vectors_0.38.1     BiocGenerics_0.46.0
     [10] BiocCheck_1.36.1
     
     loaded via a namespace (and not attached):
-     [1] SummarizedExperiment_1.30.2 stringdist_0.9.10
-     [3] rjson_0.2.21                xfun_0.40
-     [5] Biobase_2.60.0              lattice_0.21-8
-     [7] vctrs_0.6.3                 bitops_1.0-7
-     [9] generics_0.1.3              curl_5.0.2
+    [1] SummarizedExperiment_1.30.2 stringdist_0.9.10
+    [3] rjson_0.2.21                xfun_0.40
+    [5] Biobase_2.60.0              lattice_0.21-8
+    [7] vctrs_0.6.3                 bitops_1.0-7
+    [9] generics_0.1.3              curl_5.0.2
     [11] RUnit_0.4.32                parallel_4.3.1
     [13] tibble_3.2.1                fansi_1.0.4
     [15] RSQLite_2.3.1               blob_1.2.4

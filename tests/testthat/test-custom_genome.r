@@ -52,31 +52,6 @@ test_that("get_genome_urls_custom", {
                         "dna.toplevel.fa.gz")))
 })
 
-## test_that("get_genome_files", {
-##   capture_messages(res <- get_genome_files(
-##                      fasta_type = "dna_rm.nonchromosomal",
-##                      gtf_type = "abinitio.gtf", output_folder = tmp_dir,
-##                      download_timeout = 10000
-##                    ))
-##   expect_equal(res,
-##                list(
-##                  gtf = file.path(tmp_dir, "Mus_musculus.GRCm39.105.abinitio.gtf.gz"),
-##                  fasta = file.path(tmp_dir,
-##                                    "Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz")
-##                ))
-## })
-## test_that("check_sum_matches", {
-##   capture_messages(
-##     res <- check_sum_matches(
-##       paste0(
-##         "http://ftp.ensembl.org/pub/release-105/fasta/",
-##         "mus_musculus/dna/Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz"
-##       ),
-##       file.path(tmp_dir, "Mus_musculus.GRCm39.dna_rm.nonchromosomal.fa.gz")
-##     ))
-##   expect_equal(res, TRUE)
-## })
-
 test_that("qc_filter_lines_of_gtf_1", {
   expect_equal(sapply(
     strsplit(gsub("(\n| )", "",

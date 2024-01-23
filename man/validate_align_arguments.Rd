@@ -7,7 +7,10 @@
 validate_align_arguments(...)
 }
 \arguments{
-\item{...}{An ellipsis argument that is passed in Rsubreads's \verb{align' function. Typical values are }featuretype' (default: "exon"), \verb{isPairedEnd' (default: TRUE), }nthreads' (default: 30).}
+\item{...}{An ellipsis argument that is passed in Rsubreads's
+    \verb{align' function. Typical values are }featuretype' (default:
+    "exon"),
+    \verb{isPairedEnd' (default: TRUE), }nthreads' (default: 30).}
 }
 \value{
 A list containing validated and/or modified ellipsis arguments.

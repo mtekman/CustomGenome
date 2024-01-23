@@ -268,9 +268,11 @@ add_seqs_to_gtf_and_fasta <- function(genome_files, new_seqs_file) {
     ## Output files
     gtf_file_noext <- file_path_sans_ext(file_path_sans_ext(genome_files$gtf))
     new_gtf_file <- paste0(gtf_file_noext, "_with_",
-                            paste0(names(insert_seqs), collapse = "-"), ".gtf.gz")
+                            paste0(names(insert_seqs), collapse = "-"),
+                            ".gtf.gz")
 
-    fasta_file_noext <- file_path_sans_ext(file_path_sans_ext(genome_files$fasta))
+    fasta_file_noext <- file_path_sans_ext(file_path_sans_ext(
+        genome_files$fasta))
     new_genome_seq_file <- paste0(fasta_file_noext, "_with_",
                                     paste0(names(insert_seqs), collapse = "-"),
                                     ".fa.gz")
@@ -344,11 +346,13 @@ prime_fastq_files <- function(indir, r1_ending, r2_ending = NULL,
     if (!(all(file.exists(c(readfile1, readfile2))))) {
         stop("Not all files exist...")
     }
-    if (!(all(sub(r1_ending, "", readfile1) == sub(r2_ending, "", readfile2)))) {
+    if (!(all(sub(r1_ending, "", readfile1) ==
+                sub(r2_ending, "", readfile2)))) {
         stop("Could not match all R1 files to R2 files")
     }
 
-    align_files_base <- basename(paste0(sub(r1_ending, "", readfile1), align_end))
+    align_files_base <- basename(paste0(sub(r1_ending, "",
+                                            readfile1), align_end))
 
     return(list(
         reads1 = readfile1, reads2 = readfile2,
@@ -603,7 +607,7 @@ generate_count_matrix <- function(dir_lists, gtf_file, bam_pattern = "*.bam$",
     colnames(count_stat) <- cleaner_sample_names(colnames(count_stat))
     out_stat <- file.path(dir_lists$stats,
                             paste0("count.", ellips$GTF.featureType, ".",
-                                   ellips$GTF.attrType, ".stats.tsv"))
+                                    ellips$GTF.attrType, ".stats.tsv"))
     out_count <- file.path(dir_lists$count,
                             paste0(ellips$GTF.featureType, ".",
                                     ellips$GTF.attrType, ".matrix.tsv"))

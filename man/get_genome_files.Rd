@@ -22,7 +22,9 @@ the genome files. Will be created if non existent}
 \item{download_timeout}{Positive integer number. If the downloads timeout,
 increase this to 10000. Default is 1000}
 
-\item{urls_override}{A list of strings with two components: \verb{gtf' an URL for the Ensembl GTF file, }fasta' an URL for the Ensemble FASTA file. This
+\item{urls_override}{A list of strings with two components: \verb{gtf'
+    anURL 
+    for the Ensembl GTF file, }fasta' an URL for the Ensemble FASTA file. This
 parameter overrides the species, build, and release parameters. Default
 value is \code{NULL}.}
 

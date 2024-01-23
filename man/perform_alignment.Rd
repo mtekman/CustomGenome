@@ -9,11 +9,15 @@ perform_alignment(dir_lists, read_lists, nthreads = 8, ...)
 }
 \arguments{
 \item{dir_lists}{A list of directories, with three mandatory
-components: \verb{index', containing the location of the subread index; }align', the output directory of the BAM alignments; and
+components: \verb{index', containing the location of the subread index;
+}
+align', the output directory of the BAM alignments; and
 `stats', directory for stats and logging files.}
 
 \item{read_lists}{A list of vectors, with three mandatory
-components: \code{reads1}, unnamed vector of FASTQ R1 reads; \verb{reads2', unnamed vector of FASTQ R2 reads; }align_base', unnamed vector of
+components: \code{reads1}, unnamed vector of FASTQ R1 reads;
+\verb{reads2',
+unnamed vector of FASTQ R2 reads; }align_base', unnamed vector of
 future BAM file locations.}
 
 \item{nthreads}{Positive integer for the number of threads to use.

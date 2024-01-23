@@ -13,7 +13,9 @@ generate_count_matrix(
 )
 }
 \arguments{
-\item{dir_lists}{A list of three mandatory components: \verb{align' containing the directory of the alignment files, }count'
+\item{dir_lists}{A list of three mandatory components: \verb{align'
+    containing 
+    the directory of the alignment files, }count'
 containing the directory of where the count matrix will be
 placed, `stats' containing the directory of where the stats
 tables will be placed.}
@@ -32,7 +34,9 @@ Default is 8.}
 (default: "exon"), `isPairedEnd' (default: TRUE).}
 }
 \value{
-A list of two components: \verb{count' for the location of the count matrix file, and }stat' for the location of the statistics
+A list of two components: \verb{count' for the location of the count
+    matrix
+    file, and }stat' for the location of the statistics
 file. Output matrices and statistics are placed in the
 `dir_lists$count' directory.
 }

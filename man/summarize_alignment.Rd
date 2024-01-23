@@ -8,7 +8,9 @@ summarize_alignment(dir_lists, read_align)
 }
 \arguments{
 \item{dir_lists}{A list of directories, with two mandatory
-components: \verb{align', containing the location of the BAM alignments; and }stats' indicating where to store the statistics.}
+components: \verb{align', containing the location of the BAM alignments;
+and
+}stats' indicating where to store the statistics.}
 
 \item{read_align}{A vector of strings depicting the base names of
 the alignment files.}
