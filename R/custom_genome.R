@@ -109,6 +109,7 @@ get_genome_urls <- function(species = "mus_musculus",
 #'     species = "mus_musculus",
 #'     cache_folder = tempdir(),
 #'     gtf_type = "abinitio.gtf",
+#'     fasta_type = "dna.chromosome.19",
 #'     download_timeout = 10000
 #' )
 #' @export

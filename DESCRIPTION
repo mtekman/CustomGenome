@@ -2,7 +2,7 @@ Package: CustomGenome
 Type: Package
 Title: Append Custom FASTA Sequences to your Genome and Annotation
         Files for Downstream Mapping
-Version: 0.99.9
+Version: 0.99.10
 Authors@R: 
     c(person(given="Mehmet", family="Tekman",
         email = "mtekman89@gmail.com",

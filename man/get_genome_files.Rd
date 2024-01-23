@@ -44,6 +44,7 @@ mus_musc = get_genome_files(
     species = "mus_musculus",
     cache_folder = tempdir(),
     gtf_type = "abinitio.gtf",
+    fasta_type = "dna.chromosome.19",
     download_timeout = 10000
 )
 }
