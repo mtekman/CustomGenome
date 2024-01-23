@@ -8,7 +8,6 @@ get_genome_files(
     species = "mus_musculus",
     cache_folder = "genomes",
     download_timeout = 1000,
-    check_sums = TRUE,
     urls_override = NULL,
     ...
 )
@@ -42,7 +41,6 @@ do not yet exist, download them.
 mus_musc = get_genome_files(
     species = "mus_musculus",
     cache_folder = tempdir(),
-    fasta_type = "dna_rm.nonchromosomal",
     gtf_type = "abinitio.gtf",
     download_timeout = 10000
 )

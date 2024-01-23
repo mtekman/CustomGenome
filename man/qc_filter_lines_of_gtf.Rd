@@ -6,11 +6,10 @@
 \usage{
 qc_filter_lines_of_gtf(
     gtf_file,
-    wanted_biotypes = c("protein_coding", "lincRNA", "antisense",
-        "IG_LV_gene", "IG_V_gene", "IG_V_pseudogene", "IG_D_gene",
-        "IG_J_gene", "IG_J_pseudogene", "IG_C_gene", "IG_C_pseudogene",
-        "TR_V_gene", "TR_V_pseudogene", "TR_D_gene", "TR_J_gene",
-        "TR_J_pseudogene", "TR_C_gene")
+    wanted_biotypes = c("protein_coding", "lincRNA", "antisense", "IG_LV_gene",
+    "IG_V_gene", "IG_V_pseudogene", "IG_D_gene", "IG_J_gene", "IG_J_pseudogene",
+    "IG_C_gene", "IG_C_pseudogene", "TR_V_gene", "TR_V_pseudogene", "TR_D_gene",
+    "TR_J_gene", "TR_J_pseudogene", "TR_C_gene")
 )
 }
 \arguments{
