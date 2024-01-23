@@ -2,7 +2,7 @@ Package: CustomGenome
 Type: Package
 Title: Append Custom FASTA Sequences to your Genome and Annotation
         Files for Downstream Mapping
-Version: 0.99.7
+Version: 0.99.8
 Authors@R: 
     c(person(given="Mehmet", family="Tekman",
         email = "mtekman89@gmail.com",
@@ -27,7 +27,7 @@ VignetteBuilder: knitr
 biocViews: Annotation, RNASeq, Alignment, MultipleSequenceAlignment, QualityControl,
             Preprocessing, Sequencing, DataImport, GeneExpression
 Imports: Rsubread (>= 2.14.2), Biostrings (>= 2.68.1), rtracklayer (>= 1.60.0),
-            GenomicRanges (>= 1.52.0), tools, utils
+            GenomicRanges (>= 1.52.0), BiocFileCache (>= 2.8.0), tools, utils
 Suggests:
     Rsamtools,
     BiocStyle,

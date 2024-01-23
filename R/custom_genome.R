@@ -8,6 +8,7 @@
 #' @importFrom Rsubread buildindex align featureCounts
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils download.file read.table write.table capture.output
+#' @importFrom BiocFileCache BiocFileCache bfcquery bfcadd
 
 #' @title Get the URLs for the genome files
 #' @description Dynamically generates URLs for the FASTA and GTF files of a
@@ -83,73 +84,15 @@ get_genome_urls <- function(species = "mus_musculus",
     return(list(gtf = gtf_url, fasta = fasta_url))
 }
 
-#' @title Compute Unix checksums for downloaded genome files
-#'
-#' @description This function checks for existing ".sum" files which are
-#'   prefixed to downloaded files and if not present, downloads them. It then
-#'   computes the checksum locally and checks it with the downloaded.
-#' @param url URL to remote genome file (.fa.gz or .gtf.gz)
-#' @param outfile Local file where there genome file exists.
-#' @return logical. If the file is consistent with that on the remote server.
-#' @examples
-#' get_genome_files(fasta_type = "dna_rm.nonchromosomal",
-#'                 gtf_type = "abinitio.gtf", output_folder = tempdir())
-#' CustomGenome:::check_sum_matches(paste0("http://ftp.ensembl.org/",
-#'                 "pub/release-105/gtf/mus_musculus/",
-#'                 "Mus_musculus.GRCm39.105.abinitio.gtf.gz"),
-#'                 file.path(tempdir(), "Mus_musculus.GRCm39.105.abinitio.gtf.gz"))
-check_sum_matches <- function(url, outfile) {
-    parse_check_sum <- function(str) {
-        res_split <- unlist(strsplit(str, split = "\\s+"))
-        return(list(
-            sum1 = as.integer(res_split[[1]]),
-            sum2 = as.integer(res_split[[2]]),
-            name = res_split[[3]]
-        ))
-    }
-
-    get_check_sum <- function(url, outfile) {
-        checksums_gtf <- paste0(dirname(url), "/CHECKSUMS")
-        sumfile <- paste0(outfile, ".sum") ## this is not md5, it is unix "sum"
-        if (file.exists(sumfile)) {
-            message("Checksum: ", sumfile, "\n          exists already")
-            res <- readLines(sumfile)
-        } else {
-            message("Downloading: ", sumfile)
-            download.file(checksums_gtf, sumfile)
-            tab <- readLines(sumfile)
-            res <- grep(basename(outfile), tab, value = TRUE)
-            if (length(res) > 1) {
-                message(res)
-                stop("Multiple matches found")
-            }
-            message("Writing:", sumfile)
-            writeLines(res, con = sumfile)
-        }
-        return(parse_check_sum(res))
-    }
-
-    remote_sum <- get_check_sum(url, outfile)
-    local_sum <- parse_check_sum(
-        system(paste0("sum ", outfile), intern = TRUE)
-    )
-    all(
-        remote_sum$sum1 == local_sum$sum1,
-        remote_sum$sum2 == local_sum$sum2
-    )
-}
-
 #' @title Get the Genome files
 #' @description Retrieve the local genome FASTA and GTF locations, and if they
 #'   do not yet exist, download them.
 #' @param species String. Currently either `mus_musculus', `homo_sapiens', or
 #'   `danio_rerio'. Default is `mus_musculus'.
-#' @param output_folder String of characters representing the directory to store
+#' @param cache_folder String of characters representing the directory to store
 #'   the genome files. Will be created if non existent
 #' @param download_timeout Positive integer number. If the downloads timeout,
 #'   increase this to 10000. Default is 1000
-#' @param check_sums logical. Perform consistency checks on downloaded
-#'   files. Default is \code{TRUE}
 #' @param urls_override A list of strings with two components: `gtf' an URL for
 #'   the Ensembl GTF file, `fasta' an URL for the Ensemble FASTA file. This
 #'   parameter overrides the species, build, and release parameters. Default
@@ -161,20 +104,18 @@ check_sum_matches <- function(url, outfile) {
 #' @examples
 #' mus_musc = get_genome_files(
 #'     species = "mus_musculus",
-#'     output_folder = tempdir(),
-#'     fasta_type = "dna_rm.nonchromosomal",
+#'     cache_folder = tempdir(),
 #'     gtf_type = "abinitio.gtf",
 #'     download_timeout = 10000
 #' )
 #' @export
 get_genome_files <- function(species = "mus_musculus",
-                            output_folder = "genomes",
+                            cache_folder = "genomes",
                             download_timeout = 1000,
-                            check_sums = TRUE,
                             urls_override = NULL, ...) {
     options(timeout = download_timeout)
-    if (!dir.exists(output_folder)) {
-        dir.create(output_folder)
+    if (!dir.exists(cache_folder)) {
+        dir.create(cache_folder)
     }
     if (is.null(urls_override)) {
         urls <- get_genome_urls(...)
@@ -184,32 +125,30 @@ get_genome_files <- function(species = "mus_musculus",
     }
 
     outfile <- list()
-    outfile$gtf <- file.path(output_folder, basename(urls$gtf))
-    outfile$fasta <- file.path(output_folder, basename(urls$fasta))
+    base_gtf <- basename(urls$gtf)      ## Keys to access
+    base_fasta <- basename(urls$fasta)  ## records
 
-    if (file.exists(outfile$gtf)) {
-        message("GTF file: ", outfile$gtf, "\n          exists already")
-    } else {
-        message("Downloading: ", basename(outfile$gtf))
-        message(urls$gtf)
-        message(outfile$gtf)
-        download.file(urls$gtf, outfile$gtf, method = "wget")
-    }
-    if (!(check_sums && check_sum_matches(urls$gtf, outfile$gtf))) {
-        stop("Checksum for", outfile$gtf, "failed")
-    }
+    bfc <- BiocFileCache(cache_folder, ask=FALSE)
+    gtf_record <- bfcquery(bfc, base_gtf)
+    fasta_record <- bfcquery(bfc, basename(urls$fasta))
 
-    if (file.exists(outfile$fasta)) {
-        message("FASTA file: ", outfile$gtf, "\n            exists already")
+    if (nrow(gtf_record) != 0) {
+        message("GTF file: ", base_gtf, "\n          exists already")
+        outfile$gtf <- gtf_record$rpath[1]
     } else {
-        message("Downloading: ", basename(outfile$fasta))
-        message(urls$fasta)
-        message(outfile$fasta)
-        download.file(urls$fasta, outfile$fasta, method = "wget")
+        message("Downloading: ", base_gtf)
+        outfile$gtf <- bfcadd(bfc, base_gtf, fpath=urls$gtf)
     }
-    if (!(check_sums && check_sum_matches(urls$fasta, outfile$fasta))) {
-        stop("Checksum for", outfile$fasta, "failed")
+    message("Using GTF file: ", outfile$gtf)
+
+    if (nrow(fasta_record) != 0) {
+        message("FASTA file: ", base_fasta, "\n            exists already")
+        outfile$fasta <- fasta_record$rpath[1]
+    } else {
+        message("Downloading: ", base_fasta)
+        outfile$fasta <- bfcadd(bfc, base_fasta, fpath=urls$fasta)
     }
+    message("Using FASTA file: ", outfile$fasta)
     return(outfile)
 }
 

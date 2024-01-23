@@ -6,7 +6,7 @@
 \usage{
 get_genome_files(
     species = "mus_musculus",
-    output_folder = "genomes",
+    cache_folder = "genomes",
     download_timeout = 1000,
     check_sums = TRUE,
     urls_override = NULL,
@@ -17,14 +17,11 @@ get_genome_files(
 \item{species}{String. Currently either \verb{mus_musculus', }homo_sapiens', or
 \verb{danio_rerio'. Default is }mus_musculus'.}
 
-\item{output_folder}{String of characters representing the directory to store
+\item{cache_folder}{String of characters representing the directory to store
 the genome files. Will be created if non existent}
 
 \item{download_timeout}{Positive integer number. If the downloads timeout,
 increase this to 10000. Default is 1000}
-
-\item{check_sums}{logical. Perform consistency checks on downloaded
-files. Default is \code{TRUE}}
 
 \item{urls_override}{A list of strings with two components: \verb{gtf' an URL for the Ensembl GTF file, }fasta' an URL for the Ensemble FASTA file. This
 parameter overrides the species, build, and release parameters. Default
@@ -44,7 +41,7 @@ do not yet exist, download them.
 \examples{
 mus_musc = get_genome_files(
     species = "mus_musculus",
-    output_folder = tempdir(),
+    cache_folder = tempdir(),
     fasta_type = "dna_rm.nonchromosomal",
     gtf_type = "abinitio.gtf",
     download_timeout = 10000
