@@ -11,24 +11,26 @@
 #' @importFrom BiocFileCache BiocFileCache bfcquery bfcadd
 
 #' @title Get the URLs for the genome files
-#' @description Dynamically generates URLs for the FASTA and GTF files of a
-#'   given genome.
-#' @param species String. Currently either `mus_musculus', `homo_sapiens', or
-#'   `danio_rerio'. Default is `mus_musculus'.
-#' @param build String. The build for the species of interest. If \code{NULL},
-#'   it will use the latest build which is `GRCm39' for `mus_musculus' and
-#'   `GRCh38' for `homo_sapiens'.
-#' @param release String. The release version for that build. If \code{NULL}, it
-#'   will use the latest release "105".
-#' @param fasta_type String. The type of genomic FASTA sequence to retrieve.
-#'   Default is "dna.primary_assembly",
+#' @description Dynamically generates URLs for the FASTA and GTF files
+#'     of a given genome.
+#' @param species String. Currently either `mus_musculus',
+#'     `homo_sapiens', or `danio_rerio'. Default is `mus_musculus'.
+#' @param build String. The build for the species of interest. If
+#'     \code{NULL}, it will use the latest build which is `GRCm39' for
+#'     `mus_musculus' and `GRCh38' for `homo_sapiens'.
+#' @param release String. The release version for that build. If
+#'     \code{NULL}, it will use the latest release "105".
+#' @param fasta_type String. The type of genomic FASTA sequence to
+#'     retrieve. Default is "dna.primary_assembly",
 #' @param gtf_type String. The type of genomic GTF file to retrieve.
-#'   Default is "gtf", Other examples are "chr.gtf" or "abinitio.gtf".
-#' @param ensembl_base_url String depicting the base url of the Ensembl
-#'   releases. Default is "http://ftp.ensembl.org/pub".
-#' @return A list of two components. The first component \code{gtf} contains the
-#'   URL of the GTF file on server. The second component \code{fasta} contains
-#'   the URL of the FASTA primary assembly genome on server.
+#'     Default is "gtf", Other examples are "chr.gtf" or
+#'     "abinitio.gtf".
+#' @param ensembl_base_url String depicting the base url of the
+#'     Ensembl releases. Default is "http://ftp.ensembl.org/pub".
+#' @return A list of two components. The first component \code{gtf}
+#'     contains the URL of the GTF file on server. The second
+#'     component \code{fasta} contains the URL of the FASTA primary
+#'     assembly genome on server.
 #' @examples
 #' CustomGenome:::get_genome_urls(
 #'     species = "mus_musculus",
@@ -85,22 +87,23 @@ get_genome_urls <- function(species = "mus_musculus",
 }
 
 #' @title Get the Genome files
-#' @description Retrieve the local genome FASTA and GTF locations, and if they
-#'   do not yet exist, download them.
-#' @param species String. Currently either `mus_musculus', `homo_sapiens', or
-#'   `danio_rerio'. Default is `mus_musculus'.
-#' @param cache_folder String of characters representing the directory to store
-#'   the genome files. Will be created if non existent
-#' @param download_timeout Positive integer number. If the downloads timeout,
-#'   increase this to 10000. Default is 1000
-#' @param urls_override A list of strings with two components: `gtf' an URL for
-#'   the Ensembl GTF file, `fasta' an URL for the Ensemble FASTA file. This
-#'   parameter overrides the species, build, and release parameters. Default
-#'   value is \code{NULL}.
+#' @description Retrieve the local genome FASTA and GTF locations, and
+#'     if they do not yet exist, download them.
+#' @param species String. Currently either `mus_musculus',
+#'     `homo_sapiens', or `danio_rerio'. Default is `mus_musculus'.
+#' @param cache_folder String of characters representing the directory
+#'     to store the genome files. Will be created if non existent
+#' @param download_timeout Positive integer number. If the downloads
+#'     timeout, increase this to 10000. Default is 1000
+#' @param urls_override A list of strings with two components: `gtf'
+#'     an URL for the Ensembl GTF file, `fasta' an URL for the
+#'     Ensemble FASTA file. This parameter overrides the species,
+#'     build, and release parameters. Default value is \code{NULL}.
 #' @param ... Arguments to be passed onto \code{get_genome_urls}.
-#' @return A list of two components. The first component \code{gtf} contains the
-#'   location of the GTF file on disk. The second component \code{fasta}
-#'   contains the location of the FASTA primary assembly genome on disk.
+#' @return A list of two components. The first component \code{gtf}
+#'     contains the location of the GTF file on disk. The second
+#'     component \code{fasta} contains the location of the FASTA
+#'     primary assembly genome on disk.
 #' @examples
 #' mus_musc = get_genome_files(
 #'     species = "mus_musculus",
@@ -154,19 +157,19 @@ get_genome_files <- function(species = "mus_musculus",
 
 #' @title Filter sequences in a GTF for quality control
 #' @description Restrict available sequences to the same biotypes used
-#'   by CellRanger
-#'   \url{https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr}
+#'   by CellRanger.
 #' @param gtf_file String depicting the filename of a GTF file to modify
 #' @param wanted_biotypes An unnamed vector of biotypes to keep.
 #'    Default uses the full list of biotypes from CellRanger.
 #' @return A GTFFile object with filtered sequences.
 #' @examples
-#' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
+#' sub8 <- system.file("extdata", "subsample8.gtf.gz",
+#'     package = "CustomGenome")
 #' new_gtf <- CustomGenome:::qc_filter_lines_of_gtf(sub8)
 qc_filter_lines_of_gtf <- function(gtf_file,
                                     wanted_biotypes = c(
-                                        "protein_coding", "lincRNA", "antisense",
-                                        "IG_LV_gene", "IG_V_gene",
+                                        "protein_coding", "lincRNA",
+                                        "antisense", "IG_LV_gene", "IG_V_gene",
                                         "IG_V_pseudogene", "IG_D_gene",
                                         "IG_J_gene", "IG_J_pseudogene",
                                         "IG_C_gene", "IG_C_pseudogene",
@@ -199,7 +202,8 @@ qc_filter_lines_of_gtf <- function(gtf_file,
 #' @param biotype String depicting the biotype. Default: protein_coding.
 #' @return A modified GTFFile object with appended sequences included.
 #' @examples
-#' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
+#' sub8 <- system.file("extdata", "subsample8.gtf.gz",
+#'                         package = "CustomGenome")
 #' user_sequences <- system.file("extdata", "user_sequences.fa",
 #'                                 package = "CustomGenome")
 #' library(rtracklayer)
@@ -238,22 +242,23 @@ add_lines_to_gtf <- function(gtffile, insert_seqs,
 }
 
 #' @title Add new sequences to both GTF and FASTA files
-#' @description Import GTF and FASTA files, and append the new custom sequences
-#'   to both, exporting them back to file.
-#' @param genome_files A list of two components. The first component \code{gtf}
-#'   contains the location of the GTF file on disk. The second component
-#'   \code{fasta} contains the location of the FASTA primary assembly genome on
-#'   disk.
-#' @param new_seqs_file String denoting the location of the the new FASTA
-#'   sequences to be inserted on disk. Multiple sequences to be inserted should
-#'   all be placed into this file.
-#' @return A list of two components. The first component \code{gtf} contains the
-#'   location of the new annotated GTF file on disk. The second component
-#'   \code{fasta} contains the location of the new annotated FASTA primary
-#'   assembly genome on disk.
+#' @description Import GTF and FASTA files, and append the new custom
+#'     sequences to both, exporting them back to file.
+#' @param genome_files A list of two components. The first component
+#'     \code{gtf} contains the location of the GTF file on disk. The
+#'     second component \code{fasta} contains the location of the
+#'     FASTA primary assembly genome on disk.
+#' @param new_seqs_file String denoting the location of the the new
+#'     FASTA sequences to be inserted on disk. Multiple sequences to
+#'     be inserted should all be placed into this file.
+#' @return A list of two components. The first component \code{gtf}
+#'     contains the location of the new annotated GTF file on disk.
+#'     The second component \code{fasta} contains the location of the
+#'     new annotated FASTA primary assembly genome on disk.
 #' @examples
 #' myfasta <- system.file("extdata", "tiny.fa.gz", package = "CustomGenome")
-#' sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
+#' sub8 <- system.file("extdata", "subsample8.gtf.gz",
+#'                         package = "CustomGenome")
 #' user_sequences <- system.file("extdata", "user_sequences.fa",
 #'                                 package="CustomGenome")
 #' gfiles <- list(gtf = sub8, fasta = myfasta)
@@ -394,12 +399,16 @@ retrieve_index <- function(genome_fasta, index_dir = NULL, ...) {
 }
 
 
-#' @title Validate the align Ellipsis Arguments for RSubread's align function
-#' @description Convert ellipsis arguments into a list and validate their value.
-#' @param ... An ellipsis argument that is passed in Rsubreads's `align'
-#'   function. Typical values are `featuretype' (default: "exon"), `isPairedEnd'
-#'   (default: TRUE), `nthreads' (default: 30).
-#' @return A list containing validated and/or modified ellipsis arguments.
+#' @title Validate the align Ellipsis Arguments for RSubread's align
+#'     function
+#' @description Convert ellipsis arguments into a list and validate
+#'     their value.
+#' @param ... An ellipsis argument that is passed in Rsubreads's
+#'     `align' function. Typical values are `featuretype' (default:
+#'     "exon"), `isPairedEnd' (default: TRUE), `nthreads' (default:
+#'     30).
+#' @return A list containing validated and/or modified ellipsis
+#'     arguments.
 validate_align_arguments <- function(...) {
     ## Set default args for featurecounts
     ellips <- list(...)
@@ -587,7 +596,7 @@ generate_count_matrix <- function(dir_lists, gtf_file, bam_pattern = "*.bam$",
     ellips <- validate_fc_arguments(...)
     ellips$files <- bamfiles; ellips$annot.ext <- gtf_file
     ellips$isGTFAnnotationFile <- TRUE; ellips$nthreads <- nthreads
-    message("Counting : ", ellips$GTF.featureType, " threads=", ellips$nthreads)
+    message("Counting : ", ellips$GTF.featureType, " n=", ellips$nthreads)
     out_log <- file.path(dir_lists$stats,
                         paste0("count.", ellips$GTF.featureType, ".",
                                 ellips$GTF.attrType, ".log"))

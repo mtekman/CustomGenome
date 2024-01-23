@@ -200,14 +200,14 @@ new_genome_files
     >          - One
     >          - Two
     >          - Three
-    > Saving new GTF file to: genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three
-    >                         .gtf.gz
+    > Saving new GTF file to: Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz
     > FASTA exists: 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_
     >                Two_Three.fa.gz' doing nothing.
     
 This step takes approximately 5-10 minutes depending on your machine,
 and it utilizes the same GTF biotype filtering stages as the
-[cellranger pipeline](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr).
+[cellranger pipeline](https://support.10xgenomics.com/\
+single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr).
 
 The function also checks for valid genenames, omitting features which
 do not have a `gene_name` attribute.
@@ -217,7 +217,8 @@ new sequence and annotation files, in the same manner as `get_genome_files`.
 
     ## Outputs:
     $gtf   : 'genomes/Homo_sapiens.GRCh38.105_with_One_Two_Three.gtf.gz'
-    $fasta : 'genomes/Homo_sapiens.GRCh38.dna.primary_assembly_with_One_Two_Three.fa.gz'
+    $fasta : 'genomes/Homo_sapiens.GRCh38.dna\
+                .primary_assembly_with_One_Two_Three.fa.gz'
 
 ## Performing alignment and quantification of this new genomic reference.
 

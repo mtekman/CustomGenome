@@ -7,9 +7,10 @@
 qc_filter_lines_of_gtf(
     gtf_file,
     wanted_biotypes = c("protein_coding", "lincRNA", "antisense", "IG_LV_gene",
-    "IG_V_gene", "IG_V_pseudogene", "IG_D_gene", "IG_J_gene", "IG_J_pseudogene",
-    "IG_C_gene", "IG_C_pseudogene", "TR_V_gene", "TR_V_pseudogene", "TR_D_gene",
-    "TR_J_gene", "TR_J_pseudogene", "TR_C_gene")
+    "IG_V_gene", "IG_V_pseudogene", "IG_D_gene", "IG_J_gene",
+    "IG_J_pseudogene", "IG_C_gene", "IG_C_pseudogene", "TR_V_gene",
+    "TR_V_pseudogene", "TR_D_gene", "TR_J_gene", "TR_J_pseudogene",
+    "TR_C_gene")
 )
 }
 \arguments{
@@ -23,8 +24,8 @@ A GTFFile object with filtered sequences.
 }
 \description{
 Restrict available sequences to the same biotypes used
-by CellRanger
-\url{https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr}
+by CellRanger\url{https://support.10xgenomics.com/\
+    single-cell-gene-expression/software/pipelines/latest/using/tutorial_mr}
 }
 \examples{
 sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
