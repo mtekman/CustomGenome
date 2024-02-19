@@ -13,31 +13,31 @@ get_genome_files(
 )
 }
 \arguments{
-\item{species}{String. Currently either \verb{mus_musculus', }homo_sapiens', or
-\verb{danio_rerio'. Default is }mus_musculus'.}
+\item{species}{String. Currently either \verb{mus_musculus', }homo_sapiens',
+or \verb{danio_rerio'. Default is }mus_musculus'.}
 
-\item{cache_folder}{String of characters representing the directory to store
-the genome files. Will be created if non existent}
+\item{cache_folder}{String of characters representing the directory
+to store the genome files. Will be created if non existent}
 
-\item{download_timeout}{Positive integer number. If the downloads timeout,
-increase this to 10000. Default is 1000}
+\item{download_timeout}{Positive integer number. If the downloads
+timeout, increase this to 10000. Default is 1000}
 
-\item{urls_override}{A list of strings with two components: \verb{gtf'
-    anURL 
-    for the Ensembl GTF file, }fasta' an URL for the Ensemble FASTA file. This
-parameter overrides the species, build, and release parameters. Default
-value is \code{NULL}.}
+\item{urls_override}{A list of strings with two components: \verb{gtf' an URL
+for the Ensembl GTF file, }fasta' an URL for the
+Ensemble FASTA file. This parameter overrides the species,
+build, and release parameters. Default value is \code{NULL}.}
 
 \item{...}{Arguments to be passed onto \code{get_genome_urls}.}
 }
 \value{
-A list of two components. The first component \code{gtf} contains the
-location of the GTF file on disk. The second component \code{fasta}
-contains the location of the FASTA primary assembly genome on disk.
+A list of two components. The first component \code{gtf}
+contains the location of the GTF file on disk. The second
+component \code{fasta} contains the location of the FASTA
+primary assembly genome on disk.
 }
 \description{
-Retrieve the local genome FASTA and GTF locations, and if they
-do not yet exist, download them.
+Retrieve the local genome FASTA and GTF locations, and
+if they do not yet exist, download them.
 }
 \examples{
 mus_musc = get_genome_files(

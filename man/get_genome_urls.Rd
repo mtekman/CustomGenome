@@ -14,33 +14,35 @@ get_genome_urls(
 )
 }
 \arguments{
-\item{species}{String. Currently either \verb{mus_musculus', }homo_sapiens', or
-\verb{danio_rerio'. Default is }mus_musculus'.}
+\item{species}{String. Currently either \verb{mus_musculus', }homo_sapiens',
+or \verb{danio_rerio'. Default is }mus_musculus'.}
 
-\item{build}{String. The build for the species of interest. If \code{NULL},
-it will use the latest build which is \verb{GRCm39' for }mus_musculus' and
-\verb{GRCh38' for }homo_sapiens'.}
+\item{build}{String. The build for the species of interest. If
+\code{NULL}, it will use the latest build which is \verb{GRCm39' for }
+mus_musculus' and \verb{GRCh38' for }homo_sapiens'.}
 
-\item{release}{String. The release version for that build. If \code{NULL}, it
-will use the latest release "105".}
+\item{release}{String. The release version for that build. If
+\code{NULL}, it will use the latest release "105".}
 
-\item{fasta_type}{String. The type of genomic FASTA sequence to retrieve.
-Default is "dna.primary_assembly",}
+\item{fasta_type}{String. The type of genomic FASTA sequence to
+retrieve. Default is "dna.primary_assembly",}
 
 \item{gtf_type}{String. The type of genomic GTF file to retrieve.
-Default is "gtf", Other examples are "chr.gtf" or "abinitio.gtf".}
+Default is "gtf", Other examples are "chr.gtf" or
+"abinitio.gtf".}
 
-\item{ensembl_base_url}{String depicting the base url of the Ensembl
-releases. Default is "http://ftp.ensembl.org/pub".}
+\item{ensembl_base_url}{String depicting the base url of the
+Ensembl releases. Default is "http://ftp.ensembl.org/pub".}
 }
 \value{
-A list of two components. The first component \code{gtf} contains the
-URL of the GTF file on server. The second component \code{fasta} contains
-the URL of the FASTA primary assembly genome on server.
+A list of two components. The first component \code{gtf}
+contains the URL of the GTF file on server. The second
+component \code{fasta} contains the URL of the FASTA primary
+assembly genome on server.
 }
 \description{
-Dynamically generates URLs for the FASTA and GTF files of a
-given genome.
+Dynamically generates URLs for the FASTA and GTF files
+of a given genome.
 }
 \examples{
 CustomGenome:::get_genome_urls(

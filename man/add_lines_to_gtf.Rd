@@ -31,7 +31,8 @@ A modified GTFFile object with appended sequences included.
 Insert all sequences as single Ensembl "protein_coding" exons
 }
 \examples{
-sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
+sub8 <- system.file("extdata", "subsample8.gtf.gz",
+                        package = "CustomGenome")
 user_sequences <- system.file("extdata", "user_sequences.fa",
                                 package = "CustomGenome")
 library(rtracklayer)

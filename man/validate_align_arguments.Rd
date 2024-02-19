@@ -2,19 +2,22 @@
 % Please edit documentation in R/custom_genome.R
 \name{validate_align_arguments}
 \alias{validate_align_arguments}
-\title{Validate the align Ellipsis Arguments for RSubread's align function}
+\title{Validate the align Ellipsis Arguments for RSubread's align
+function}
 \usage{
 validate_align_arguments(...)
 }
 \arguments{
 \item{...}{An ellipsis argument that is passed in Rsubreads's
-    \verb{align' function. Typical values are }featuretype' (default:
-    "exon"),
-    \verb{isPairedEnd' (default: TRUE), }nthreads' (default: 30).}
+\verb{align' function. Typical values are }featuretype' (default:
+"exon"), \verb{isPairedEnd' (default: TRUE), }nthreads' (default:
+30).}
 }
 \value{
-A list containing validated and/or modified ellipsis arguments.
+A list containing validated and/or modified ellipsis
+arguments.
 }
 \description{
-Convert ellipsis arguments into a list and validate their value.
+Convert ellipsis arguments into a list and validate
+their value.
 }

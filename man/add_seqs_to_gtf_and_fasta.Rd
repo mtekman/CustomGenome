@@ -7,28 +7,29 @@
 add_seqs_to_gtf_and_fasta(genome_files, new_seqs_file)
 }
 \arguments{
-\item{genome_files}{A list of two components. The first component \code{gtf}
-contains the location of the GTF file on disk. The second component
-\code{fasta} contains the location of the FASTA primary assembly genome on
-disk.}
+\item{genome_files}{A list of two components. The first component
+\code{gtf} contains the location of the GTF file on disk. The
+second component \code{fasta} contains the location of the
+FASTA primary assembly genome on disk.}
 
-\item{new_seqs_file}{String denoting the location of the the new FASTA
-sequences to be inserted on disk. Multiple sequences to be inserted should
-all be placed into this file.}
+\item{new_seqs_file}{String denoting the location of the the new
+FASTA sequences to be inserted on disk. Multiple sequences to
+be inserted should all be placed into this file.}
 }
 \value{
-A list of two components. The first component \code{gtf} contains the
-location of the new annotated GTF file on disk. The second component
-\code{fasta} contains the location of the new annotated FASTA primary
-assembly genome on disk.
+A list of two components. The first component \code{gtf}
+contains the location of the new annotated GTF file on disk.
+The second component \code{fasta} contains the location of the
+new annotated FASTA primary assembly genome on disk.
 }
 \description{
-Import GTF and FASTA files, and append the new custom sequences
-to both, exporting them back to file.
+Import GTF and FASTA files, and append the new custom
+sequences to both, exporting them back to file.
 }
 \examples{
 myfasta <- system.file("extdata", "tiny.fa.gz", package = "CustomGenome")
-sub8 <- system.file("extdata", "subsample8.gtf.gz", package = "CustomGenome")
+sub8 <- system.file("extdata", "subsample8.gtf.gz",
+                        package = "CustomGenome")
 user_sequences <- system.file("extdata", "user_sequences.fa",
                                 package="CustomGenome")
 gfiles <- list(gtf = sub8, fasta = myfasta)
