@@ -22,3 +22,29 @@ fragments, along with the percentage mapped.
 Collate all individual BAM statistics into a single
 table, and write the summaries to file.
 }
+\examples{
+dir_lists <- list(
+    align = file.path(tempdir(), "align"),
+    stats = file.path(tempdir(), "stats")
+)
+dir.create(dir_lists$align)
+dir.create(dir_lists$stats)
+## create dummy summary data
+write.table(
+    x = data.frame(BAM1 = t(data.frame(
+        Mapped_fragments = 100,
+        Total_fragments = 120
+    ))),
+    sep = "\t", quote = FALSE, row.names = TRUE,
+    file = file.path(dir_lists$align, "BAM1.summary")
+)
+write.table(
+    x = data.frame(BAM2 = t(data.frame(
+        Mapped_fragments = 90,
+        Total_fragments = 110
+    ))),
+    sep = "\t", quote = FALSE, row.names = TRUE,
+    file = file.path(dir_lists$align, "BAM2.summary")
+)
+summarize_alignment(dir_lists, c("BAM1", "BAM2"))
+}
